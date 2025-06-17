@@ -1,150 +1,111 @@
 <img src="src/assets/img/icon-128.png" width="64"/>
 
-# Chrome Extension (MV3) Boilerplate with React 18 and Webpack 5
+# ExplainX - YouTube Transcript & Page Content Viewer
 
-[![npm](https://img.shields.io/npm/v/chrome-extension-boilerplate-react)](https://www.npmjs.com/package/chrome-extension-boilerplate-react)
-[![npm-download](https://img.shields.io/npm/dw/chrome-extension-boilerplate-react)](https://www.npmjs.com/package/chrome-extension-boilerplate-react)
-[![npm](https://img.shields.io/npm/dm/chrome-extension-boilerplate-react)](https://www.npmjs.com/package/chrome-extension-boilerplate-react)
-
-## Announcements
-
-- Recently updated from **[React](https://reactjs.org)** ~~17~~ to **18**!
-- **_This boilerplate adopts [Manifest V3](https://developer.chrome.com/docs/extensions/mv3/intro/mv3-overview/)!_**
-  - For V2 users, please check out the [manifest-v2](https://github.com/lxieyang/chrome-extension-boilerplate-react/tree/manifest-v2) branch, or use version [3.x](https://www.npmjs.com/package/chrome-extension-boilerplate-react/v/3.3.0).
-  - Check out the [Manifest V3 Migration Guide](https://developer.chrome.com/docs/extensions/mv3/intro/mv3-migration/).
-- Recently added [devtools](https://developer.chrome.com/docs/extensions/mv3/devtools/) Support! Thanks [GeekaholicLin](https://github.com/lxieyang/chrome-extension-boilerplate-react/issues/17)!
-- Recently updated from **[Webpack Dev Server](https://webpack.js.org/configuration/dev-server/)** ~~3.x~~ to **4.x** and **[Webpack](https://webpack.js.org/)** ~~4~~ to **5**!
-- Recently added [TypeScript](https://www.typescriptlang.org/) Support!
+A Chrome extension that helps you quickly extract and view YouTube video transcripts and web page content in a convenient popup interface.
 
 ## Features
 
-This is a basic Chrome Extensions boilerplate to help you write modular and modern Javascript code, load CSS easily and [automatic reload the browser on code changes](https://webpack.github.io/docs/webpack-dev-server.html#automatic-refresh).
+- **YouTube Transcript Extraction**: Automatically extracts transcripts from YouTube videos
+- **Page Content Extraction**: Extracts readable text content from any webpage
+- **Clean UI**: Modern, responsive popup interface
+- **Copy to Clipboard**: Easily copy extracted content
+- **Refresh Content**: Update content without reloading the page
+- **Auto-Detection**: Automatically detects whether you're on YouTube or another site
 
-This boilerplate is updated with:
+## Installation
 
-- [Chrome Extension Manifest V3](https://developer.chrome.com/docs/extensions/mv3/intro/mv3-overview/)
-- [React 18](https://reactjs.org)
-- [Webpack 5](https://webpack.js.org/)
-- [Webpack Dev Server 4](https://webpack.js.org/configuration/dev-server/)
-- [React Refresh](https://www.npmjs.com/package/react-refresh)
-- [react-refresh-webpack-plugin](https://github.com/pmmmwh/react-refresh-webpack-plugin)
-- [eslint-config-react-app](https://www.npmjs.com/package/eslint-config-react-app)
-- [Prettier](https://prettier.io/)
-- [TypeScript](https://www.typescriptlang.org/)
-
-This boilerplate is heavily inspired by and adapted from [https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate](https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate), with additional support for React 18 features, Webpack 5, and Webpack Dev Server 4.
-
-Please open up an issue to nudge me to keep the npm packages up-to-date. FYI, it takes time to make different packages with different versions work together nicely.
-
-## Installing and Running
-
-### Procedures:
+### From Source
 
 1. Check if your [Node.js](https://nodejs.org/) version is >= **18**.
-2. Clone this repository.
-3. Change the package's `name`, `description`, and `repository` fields in `package.json`.
-4. Change the name of your extension on `src/manifest.json`.
-5. Run `npm install` to install the dependencies.
-6. Run `npm start`
-7. Load your extension on Chrome following:
-   1. Access `chrome://extensions/`
-   2. Check `Developer mode`
-   3. Click on `Load unpacked extension`
-   4. Select the `build` folder.
-8. Happy hacking.
+2. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/explainx-extension.git
+   cd explainx-extension
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Build the extension:
+   ```bash
+   npm run build
+   ```
+5. Load the extension in Chrome:
+   1. Open `chrome://extensions/`
+   2. Enable `Developer mode`
+   3. Click `Load unpacked extension`
+   4. Select the `build` folder
 
-## Structure
+### Development
 
-All your extension's code must be placed in the `src` folder.
+To develop the extension with hot reloading:
 
-The boilerplate is already prepared to have a popup, an options page, a background page, and a new tab page (which replaces the new tab page of your browser). But feel free to customize these.
-
-## TypeScript
-
-This boilerplate now supports TypeScript! The `Options` Page is implemented using TypeScript. Please refer to `src/pages/Options/` for example usages.
-
-## Webpack auto-reload and HRM
-
-To make your workflow much more efficient this boilerplate uses the [webpack server](https://webpack.github.io/docs/webpack-dev-server.html) to development (started with `npm start`) with auto reload feature that reloads the browser automatically every time that you save some file in your editor.
-
-You can run the dev mode on other port if you want. Just specify the env var `port` like this:
-
-```
-$ PORT=6002 npm run start
+```bash
+npm start
 ```
 
-## Content Scripts
+This will start the webpack dev server. You can specify a different port:
 
-Although this boilerplate uses the webpack dev server, it's also prepared to write all your bundles files on the disk at every code change, so you can point, on your extension manifest, to your bundles that you want to use as [content scripts](https://developer.chrome.com/extensions/content_scripts), but you need to exclude these entry points from hot reloading [(why?)](https://github.com/samuelsimoes/chrome-extension-webpack-boilerplate/issues/4#issuecomment-261788690). To do so you need to expose which entry points are content scripts on the `webpack.config.js` using the `chromeExtensionBoilerplate -> notHotReload` config. Look the example below.
-
-Let's say that you want use the `myContentScript` entry point as content script, so on your `webpack.config.js` you will configure the entry point and exclude it from hot reloading, like this:
-
-```js
-{
-  …
-  entry: {
-    myContentScript: "./src/js/myContentScript.js"
-  },
-  chromeExtensionBoilerplate: {
-    notHotReload: ["myContentScript"]
-  }
-  …
-}
+```bash
+PORT=6002 npm start
 ```
 
-and on your `src/manifest.json`:
+## How It Works
 
-```json
-{
-  "content_scripts": [
-    {
-      "matches": ["https://www.google.com/*"],
-      "js": ["myContentScript.bundle.js"]
-    }
-  ]
-}
-```
+### On YouTube
+- Click the extension icon while watching a YouTube video
+- The extension will attempt to extract the video transcript
+- If available, the transcript will be displayed in the popup
+- Multiple methods are used to ensure maximum compatibility
 
-## Intelligent Code Completion
+### On Other Websites
+- Click the extension icon on any webpage
+- The extension will extract the main readable content
+- Content is cleaned and formatted for easy reading
+- Long content is truncated to 5000 characters for performance
 
-Thanks to [@hudidit](https://github.com/lxieyang/chrome-extension-boilerplate-react/issues/4)'s kind suggestions, this boilerplate supports chrome-specific intelligent code completion using [@types/chrome](https://www.npmjs.com/package/@types/chrome).
+## Usage
 
-## Packing
+1. Navigate to any webpage or YouTube video
+2. Click the ExplainX extension icon in your browser toolbar
+3. Wait for the content to load (YouTube transcripts may take a few seconds)
+4. Use the "Copy" button to copy content to your clipboard
+5. Use the "Refresh" button to reload content if needed
 
-After the development of your extension run the command
+## Technical Details
 
-```
-$ NODE_ENV=production npm run build
-```
+- Built with React 18 and Webpack 5
+- Uses Chrome Extension Manifest V3
+- Content scripts handle page content extraction
+- Background script manages communication between popup and content scripts
+- Supports both YouTube caption tracks and transcript panels
 
-Now, the content of `build` folder will be the extension ready to be submitted to the Chrome Web Store. Just take a look at the [official guide](https://developer.chrome.com/webstore/publish) to more infos about publishing.
+## Permissions
 
-## Secrets
+The extension requires the following permissions:
+- `activeTab`: To access the current tab's content
+- `scripting`: To inject content scripts
+- `storage`: To store user preferences
+- `*://*.youtube.com/*`: To access YouTube content
+- `*://*/*`: To access content from all websites
 
-If you are developing an extension that talks with some API you probably are using different keys for testing and production. Is a good practice you not commit your secret keys and expose to anyone that have access to the repository.
+## Contributing
 
-To this task this boilerplate import the file `./secrets.<THE-NODE_ENV>.js` on your modules through the module named as `secrets`, so you can do things like this:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-_./secrets.development.js_
+## License
 
-```js
-export default { key: '123' };
-```
+MIT License - see LICENSE file for details.
 
-_./src/popup.js_
+## Support
 
-```js
-import secrets from 'secrets';
-ApiCall({ key: secrets.key });
-```
-
-:point_right: The files with name `secrets.*.js` already are ignored on the repository.
-
-## Resources:
-
-- [Webpack documentation](https://webpack.js.org/concepts/)
-- [Chrome Extension documentation](https://developer.chrome.com/extensions/getstarted)
+If you encounter any issues or have feature requests, please create an issue on GitHub.
 
 ---
 
-Michael Xieyang Liu | [Website](https://lxieyang.github.io)
+Built with ❤️ using the Chrome Extension React Webpack Boilerplate
