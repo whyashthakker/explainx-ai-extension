@@ -6,21 +6,21 @@ const Popup = () => {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [pageInfo, setPageInfo] = useState({ title: '', url: '', type: '' });
+  const [pageInfo, setPageInfo] = useState({ title: '', url: '', type: '', timestamp: null });
+  const [hasStoredContent, setHasStoredContent] = useState(false);
 
-  const fetchContent = async () => {
+  const fetchStoredContent = async () => {
     setLoading(true);
     setError('');
-    setContent('');
 
     try {
-      // Send message to background script to get content
+      // Get stored content from local storage
       const response = await new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({ action: 'getPageContent' }, (response) => {
+        chrome.storage.local.get(['explainx_extracted_content'], (result) => {
           if (chrome.runtime.lastError) {
             reject(new Error(chrome.runtime.lastError.message));
           } else {
-            resolve(response);
+            resolve(result.explainx_extracted_content);
           }
         });
       });
@@ -30,21 +30,60 @@ const Popup = () => {
         setPageInfo({
           title: response.title,
           url: response.url,
-          type: response.type
+          type: response.type,
+          timestamp: response.timestamp
         });
+        setHasStoredContent(true);
       } else {
-        setError('No response received from content script');
+        setContent('');
+        setPageInfo({ title: '', url: '', type: '', timestamp: null });
+        setHasStoredContent(false);
+        setError('No content extracted yet. Click the floating "Extract" button on any webpage to capture content.');
       }
     } catch (err) {
       setError('Error: ' + err.message);
-      console.error('Error fetching content:', err);
+      console.error('Error fetching stored content:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const clearStoredContent = async () => {
+    try {
+      await new Promise((resolve, reject) => {
+        chrome.storage.local.remove(['explainx_extracted_content'], () => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      setContent('');
+      setPageInfo({ title: '', url: '', type: '', timestamp: null });
+      setHasStoredContent(false);
+      setError('Content cleared. Use the floating button to extract new content.');
+    } catch (err) {
+      setError('Error clearing content: ' + err.message);
+    }
+  };
+
   useEffect(() => {
-    fetchContent();
+    fetchStoredContent();
+    
+    // Listen for storage changes to auto-update popup
+    const handleStorageChange = (changes, namespace) => {
+      if (namespace === 'local' && changes.explainx_extracted_content) {
+        fetchStoredContent();
+      }
+    };
+    
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
   }, []);
 
   const copyToClipboard = () => {
@@ -56,7 +95,19 @@ const Popup = () => {
   };
 
   const refreshContent = () => {
-    fetchContent();
+    fetchStoredContent();
+  };
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+  };
+
+  const openSourceUrl = () => {
+    if (pageInfo.url) {
+      chrome.tabs.create({ url: pageInfo.url });
+    }
   };
 
   return (
@@ -69,10 +120,20 @@ const Popup = () => {
       <div className="popup-content">
         {pageInfo.title && (
           <div className="page-info">
-            <h3 className="page-title">{pageInfo.title}</h3>
+            <h3 className="page-title" title={pageInfo.title}>{pageInfo.title}</h3>
             <p className="page-type">
               {pageInfo.type === 'youtube' ? '📹 YouTube Video' : '📄 Web Page'}
             </p>
+            {pageInfo.timestamp && (
+              <p className="page-timestamp">
+                Extracted: {formatTimestamp(pageInfo.timestamp)}
+              </p>
+            )}
+            {pageInfo.url && (
+              <button onClick={openSourceUrl} className="source-link-btn">
+                🔗 Open Source
+              </button>
+            )}
           </div>
         )}
 
@@ -81,27 +142,40 @@ const Popup = () => {
             {loading ? '🔄 Loading...' : '🔄 Refresh'}
           </button>
           {content && (
-            <button onClick={copyToClipboard} className="action-btn copy-btn">
-              📋 Copy
-            </button>
+            <>
+              <button onClick={copyToClipboard} className="action-btn copy-btn">
+                📋 Copy
+              </button>
+              <button onClick={clearStoredContent} className="action-btn clear-btn">
+                🗑️ Clear
+              </button>
+            </>
           )}
         </div>
 
         <div className="content-area">
           {loading && (
             <div className="loading-message">
-              <p>Fetching content...</p>
-              {pageInfo.type === 'youtube' && (
-                <p className="loading-note">This may take a few seconds for YouTube transcripts</p>
-              )}
+              <p>Loading stored content...</p>
             </div>
           )}
           
           {error && (
             <div className="error-message">
-              <p>❌ {error}</p>
+              <p>ℹ️ {error}</p>
+              {!hasStoredContent && (
+                <div className="instructions">
+                  <h4>How to use ExplainX:</h4>
+                  <ol>
+                    <li>Go to any webpage or YouTube video</li>
+                    <li>Look for the floating purple "Extract" button</li>
+                    <li>Click it to extract content</li>
+                    <li>Return here to view the extracted content</li>
+                  </ol>
+                </div>
+              )}
               <button onClick={refreshContent} className="retry-btn">
-                Try Again
+                Check Again
               </button>
             </div>
           )}
