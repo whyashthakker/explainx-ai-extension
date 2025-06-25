@@ -12,6 +12,7 @@
   flex-direction: column;
 }
 
+
 .popup-header {
   display: flex;
   align-items: center;
@@ -34,6 +35,8 @@
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -0.5px;
+  flex: 1;
+  /* This makes the title take up available space */
 }
 
 .popup-content {
@@ -126,6 +129,27 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.settings-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
 
 /* User Info Bar */

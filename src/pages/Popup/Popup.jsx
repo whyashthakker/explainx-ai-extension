@@ -225,31 +225,8 @@ const Popup = () => {
     }
   }, [isAuthenticated]);
 
-  const copyToClipboard = () => {
-    navigator.clipboard
-      .writeText(content)
-      .then(() => {
-        alert('Content copied to clipboard!');
-      })
-      .catch((err) => {
-        console.error('Failed to copy: ', err);
-      });
-  };
-
-  const refreshContent = () => {
-    fetchStoredContent();
-  };
-
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return '';
-    const date = new Date(timestamp);
-    return date.toLocaleString();
-  };
-
-  const openSourceUrl = () => {
-    if (pageInfo.url) {
-      chrome.tabs.create({ url: pageInfo.url });
-    }
+  const openOptionsPage = () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL('options.html') });
   };
 
   // Create current content object for Spaces component
@@ -268,6 +245,13 @@ const Popup = () => {
       <header className="popup-header">
         <img src={logo} className="popup-logo" alt="ExplainX Logo" />
         <h1 className="popup-title">ExplainX</h1>
+        <button
+          onClick={openOptionsPage}
+          className="settings-btn"
+          title="Open Settings"
+        >
+          ⚙️
+        </button>
       </header>
 
       <div className="popup-content">
