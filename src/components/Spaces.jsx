@@ -27,6 +27,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
       const storedToken = result.access_token;
 
       if (storedToken) {
+        console.log('JWT token found:', storedToken);
         setAuthToken(storedToken);
         await loadSpaces(storedToken);
       } else {
@@ -38,8 +39,8 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
     }
   };
 
-  const loadSpaces = async (tokenToUse = authToken) => {
-    if (!tokenToUse) {
+  const loadSpaces = async () => {
+    if (!authToken) {
       return;
     }
 
@@ -51,7 +52,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${tokenToUse}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
 
