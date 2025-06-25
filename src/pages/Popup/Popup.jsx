@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import logo from '../../assets/img/icon-128.png';
 import Spaces from '../../components/Spaces';
+import Content from '../../components/Content';
 import './Popup.css';
 import { DEV_MODE } from '../Constants/';
 const Popup = () => {
@@ -344,88 +345,7 @@ const Popup = () => {
         {/* Content Tab */}
         {activeTab === 'content' && (
           <>
-            {pageInfo.title && (
-              <div className="page-info">
-                <h3 className="page-title" title={pageInfo.title}>
-                  {pageInfo.title}
-                </h3>
-                <p className="page-type">
-                  {pageInfo.type === 'youtube'
-                    ? '📹 YouTube Video'
-                    : '📄 Web Page'}
-                </p>
-                {pageInfo.timestamp && (
-                  <p className="page-timestamp">
-                    Extracted: {formatTimestamp(pageInfo.timestamp)}
-                  </p>
-                )}
-                {pageInfo.url && (
-                  <button onClick={openSourceUrl} className="source-link-btn">
-                    🔗 Open Source
-                  </button>
-                )}
-              </div>
-            )}
-
-            <div className="content-actions">
-              <button
-                onClick={refreshContent}
-                className="action-btn refresh-btn"
-                disabled={loading}
-              >
-                {loading ? '🔄 Loading...' : '🔄 Refresh'}
-              </button>
-              {content && (
-                <>
-                  <button
-                    onClick={copyToClipboard}
-                    className="action-btn copy-btn"
-                  >
-                    📋 Copy
-                  </button>
-                  <button
-                    onClick={clearStoredContent}
-                    className="action-btn clear-btn"
-                  >
-                    🗑️ Clear
-                  </button>
-                </>
-              )}
-            </div>
-
-            <div className="content-area">
-              {loading && (
-                <div className="loading-message">
-                  <p>Loading stored content...</p>
-                </div>
-              )}
-
-              {error && (
-                <div className="error-message">
-                  <p>ℹ️ {error}</p>
-                  {!hasStoredContent && (
-                    <div className="instructions">
-                      <h4>How to use ExplainX:</h4>
-                      <ol>
-                        <li>Go to any webpage or YouTube video</li>
-                        <li>Look for the floating purple "Extract" button</li>
-                        <li>Click it to extract content</li>
-                        <li>Return here to view the extracted content</li>
-                      </ol>
-                    </div>
-                  )}
-                  <button onClick={refreshContent} className="retry-btn">
-                    Check Again
-                  </button>
-                </div>
-              )}
-
-              {content && !loading && (
-                <div className="content-display">
-                  <div className="content-text">{content}</div>
-                </div>
-              )}
-            </div>
+            <Content />
           </>
         )}
 

@@ -1,0 +1,226 @@
+/* Content.css */
+.content-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Page Info Section */
+.page-info {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+    flex-shrink: 0;
+}
+
+.page-title {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.4;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.page-type {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.page-timestamp {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.source-link-btn {
+    padding: 6px 12px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.source-link-btn:hover {
+    background: #2563eb;
+}
+
+/* Content Actions */
+.content-actions {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.refresh-btn {
+    background: #3b82f6;
+    color: white;
+}
+
+.refresh-btn:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.refresh-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.copy-btn {
+    background: #10b981;
+    color: white;
+}
+
+.copy-btn:hover {
+    background: #059669;
+}
+
+.clear-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.clear-btn:hover {
+    background: #dc2626;
+}
+
+/* Content Area */
+.content-area {
+    flex: 1;
+    min-height: 300px;
+    overflow-y: auto;
+}
+
+.loading-message {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.loading-message p {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.error-message {
+    padding: 30px 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.error-message p {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+}
+
+.instructions {
+    margin: 20px 0;
+    text-align: left;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.instructions h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.instructions ol {
+    margin: 0;
+    padding-left: 20px;
+    color: #6b7280;
+}
+
+.instructions li {
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.retry-btn {
+    padding: 8px 16px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.retry-btn:hover {
+    background: #2563eb;
+}
+
+.content-display {
+    padding: 20px;
+    flex: 1;
+}
+
+.content-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #374151;
+    background: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-height: 250px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Scrollbar styling */
+.content-area::-webkit-scrollbar,
+.content-text::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content-area::-webkit-scrollbar-track,
+.content-text::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.content-area::-webkit-scrollbar-thumb,
+.content-text::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.content-area::-webkit-scrollbar-thumb:hover,
+.content-text::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

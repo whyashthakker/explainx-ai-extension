@@ -24,11 +24,13 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
     try {
       // Check if JWT token is stored
       const result = await chrome.storage.local.get(['access_token']);
+      console.log(result);
       const storedToken = result.access_token;
+      console.log(storedToken);
 
       if (storedToken) {
-        console.log('JWT token found:', storedToken);
         setAuthToken(storedToken);
+        console.log('JWT token found:', storedToken);
         await loadSpaces(storedToken);
       } else {
         setLoading(false);
@@ -39,8 +41,8 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
     }
   };
 
-  const loadSpaces = async () => {
-    if (!authToken) {
+  const loadSpaces = async (tokenToUse = authToken) => {
+    if (!tokenToUse) {
       return;
     }
 
@@ -52,7 +54,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${tokenToUse}`,
         },
       });
 
@@ -122,6 +124,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
       setSavingToSpace(null);
     }
   };
+
   return (
     <div className="spaces-container">
       <div className="spaces-header">
