@@ -3,13 +3,15 @@ import React, { useState, useEffect } from 'react';
 import './Spaces.css';
 import { DEV_MODE } from '../pages/Constants/';
 
-const Spaces = ({ onSpaceSelect, currentContent }) => {
+const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
   const [spaces, setSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedSpace, setSelectedSpace] = useState(null);
   const [savingToSpace, setSavingToSpace] = useState(null);
+  const [savedToSpace, setSavedToSpace] = useState(null);
   const [authToken, setAuthToken] = useState(null);
+  const [toast, setToast] = useState(null);
 
   // Configuration
   const API_BASE_URL = DEV_MODE
@@ -19,6 +21,19 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
   useEffect(() => {
     checkAuthAndLoadSpaces();
   }, []);
+
+  // Function to show toast
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000); // Hide after 3 seconds
+  };
+
+  // Clear saved state when new content is available
+  useEffect(() => {
+    if (currentContent && savedToSpace) {
+      setSavedToSpace(null);
+    }
+  }, [currentContent]);
 
   const checkAuthAndLoadSpaces = async () => {
     try {
@@ -49,6 +64,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
     try {
       setLoading(true);
       setError('');
+      console.log('Loading spaces with token:', tokenToUse);
 
       const response = await fetch(`${API_BASE_URL}/extension/spaces`, {
         method: 'GET',
@@ -75,38 +91,46 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
     }
   };
 
+  // Enhanced save function that creates study material directly
   const saveToSpace = async (space) => {
     if (!currentContent || !currentContent.content) {
-      alert('No content to save. Please extract content first.');
+      showToast('No content to save. Please extract content first.', 'error');
       return;
     }
 
     if (!authToken) {
+      showToast('Please authenticate first.', 'error');
       return;
     }
 
     try {
       setSavingToSpace(space.id);
 
+      // Prepare enhanced content data for the new API
       const contentData = {
-        title: currentContent.title || 'Extracted Content',
+        spaceId: space.id,
+        title:
+          currentContent.title ||
+          `Extracted Content - ${new Date().toLocaleDateString()}`,
         content: currentContent.content,
-        type: currentContent.type || 'page',
-        sourceUrl: currentContent.url,
-        extractedAt: currentContent.timestamp || Date.now(),
+        type: currentContent.type || 'page', // 'page', 'youtube', etc.
+        sourceUrl: currentContent.url || window.location.href,
+        description:
+          currentContent.description ||
+          `Content extracted from ${
+            currentContent.type === 'youtube' ? 'YouTube video' : 'web page'
+          } on ${new Date().toLocaleDateString()}`,
       };
 
-      const response = await fetch(
-        `${API_BASE_URL}/spaces/${space.id}/content`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify(contentData),
-        }
-      );
+      // Use the new direct content save API
+      const response = await fetch(`${API_BASE_URL}/extension/study-material`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(contentData),
+      });
 
       if (!response.ok) {
         const errorData = await response
@@ -116,12 +140,70 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
       }
 
       const result = await response.json();
-      alert(`Content saved to "${space.name}" successfully!`);
+
+      // Show success message with more details
+      showToast('Study material saved successfully!', 'success');
+      currentContent = null;
+
+      console.log('Content saved successfully:', result);
     } catch (err) {
       console.error('Error saving content:', err);
-      alert(`Failed to save content: ${err.message}`);
+
+      // Enhanced error handling
+      let errorMessage = 'Failed to save content';
+      if (err.message.includes('Unauthorized')) {
+        errorMessage = 'Authentication failed. Please log in again.';
+        // Optionally clear the stored token
+        chrome.storage.local.remove(['access_token']);
+        setAuthToken(null);
+      } else if (err.message.includes('Access denied')) {
+        errorMessage =
+          "You don't have permission to save content to this space.";
+      } else if (err.message.includes('Missing required fields')) {
+        errorMessage =
+          'Some required information is missing. Please try extracting content again.';
+      } else {
+        errorMessage = `Save failed: ${err.message}`;
+      }
+
+      showToast('❌ ' + errorMessage, 'error');
     } finally {
       setSavingToSpace(null);
+    }
+  };
+
+  // NEW: Function to test API connectivity
+  const testConnection = async () => {
+    if (!authToken) {
+      showToast('No authentication token found.', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/extension/content`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showToast(
+          `✅ Connection successful!\nAuthenticated as: ${
+            data.user.name || data.user.email
+          }`,
+          'success'
+        );
+      } else {
+        showToast(
+          '❌ Connection failed. Please check your authentication.',
+          'error'
+        );
+      }
+    } catch (err) {
+      showToast(`❌ Connection test failed: ${err.message}`, 'error');
     }
   };
 
@@ -129,13 +211,16 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
     <div className="spaces-container">
       <div className="spaces-header">
         <h3>My Spaces</h3>
-        <button
-          onClick={loadSpaces}
-          className="refresh-spaces-btn"
-          disabled={loading}
-        >
-          {loading ? '🔄' : '↻'}
-        </button>
+        <div className="header-actions">
+          <button
+            onClick={async () => await loadSpaces(authToken)}
+            className="refresh-spaces-btn"
+            disabled={loading}
+            title="Refresh spaces"
+          >
+            {loading ? '🔄' : '↻'}
+          </button>
+        </div>
       </div>
 
       {loading && (
@@ -176,7 +261,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
                         {space.isPublic ? '🌐 Public' : '🔒 Private'}
                       </span>
                       <span className="space-materials">
-                        📚 {space._count.studyMaterials} materials
+                        📚 {space._count?.studyMaterials || 0} materials
                       </span>
                     </div>
                   </div>
@@ -184,8 +269,17 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
                   <div className="space-actions">
                     <button
                       onClick={() => saveToSpace(space)}
-                      className="save-to-space-btn"
+                      className={`save-to-space-btn ${
+                        !currentContent || savingToSpace === space.id
+                          ? 'disabled'
+                          : 'enabled'
+                      }`}
                       disabled={!currentContent || savingToSpace === space.id}
+                      title={
+                        !currentContent
+                          ? 'Extract content first'
+                          : 'Save content as study material'
+                      }
                     >
                       {savingToSpace === space.id
                         ? '💾 Saving...'
@@ -197,6 +291,35 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
             </div>
           )}
         </>
+      )}
+
+      {/* Enhanced status indicator */}
+      {currentContent && (
+        <div className="content-status">
+          <div className="content-preview">
+            <h5>📄 Ready to Save:</h5>
+            <p className="content-title">
+              {currentContent.title || 'Untitled Content'}
+            </p>
+            <p className="content-meta">
+              {currentContent.type} •{' '}
+              {(currentContent.content?.length || 0).toLocaleString()}{' '}
+              characters
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toast && (
+        <div className={`toast ${toast.type}`}>
+          <div className="toast-content">
+            <span className="toast-icon">
+              {toast.type === 'success' ? '✅' : '❌'}
+            </span>
+            <span className="toast-message">{toast.message}</span>
+          </div>
+        </div>
       )}
     </div>
   );
