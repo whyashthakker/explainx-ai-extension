@@ -9,7 +9,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
   const [error, setError] = useState('');
   const [selectedSpace, setSelectedSpace] = useState(null);
   const [savingToSpace, setSavingToSpace] = useState(null);
-  const [userId, setUserId] = useState(null);
+  const [authToken, setAuthToken] = useState(null);
 
   // Configuration
   const API_BASE_URL = DEV_MODE
@@ -22,15 +22,13 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
 
   const checkAuthAndLoadSpaces = async () => {
     try {
-      // Check if user ID is stored
-      const result = await chrome.storage.local.get(['user_info']);
-      console.log(result);
-      const storedUserId = result.user_info?.id;
-      console.log(storedUserId);
+      // Check if JWT token is stored
+      const result = await chrome.storage.local.get(['access_token']);
+      const storedToken = result.access_token;
 
-      if (storedUserId) {
-        setUserId(storedUserId);
-        await loadSpaces(storedUserId);
+      if (storedToken) {
+        setAuthToken(storedToken);
+        await loadSpaces(storedToken);
       } else {
         setLoading(false);
       }
@@ -40,8 +38,8 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
     }
   };
 
-  const loadSpaces = async (userIdToUse = userId) => {
-    if (!userIdToUse) {
+  const loadSpaces = async (tokenToUse = authToken) => {
+    if (!tokenToUse) {
       return;
     }
 
@@ -53,7 +51,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'x-extension-user-id': userIdToUse,
+          Authorization: `Bearer ${tokenToUse}`,
         },
       });
 
@@ -80,7 +78,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
       return;
     }
 
-    if (!userId) {
+    if (!authToken) {
       return;
     }
 
@@ -101,7 +99,7 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-extension-user-id': userId,
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify(contentData),
         }
@@ -123,7 +121,6 @@ const Spaces = ({ onSpaceSelect, currentContent }) => {
       setSavingToSpace(null);
     }
   };
-
   return (
     <div className="spaces-container">
       <div className="spaces-header">

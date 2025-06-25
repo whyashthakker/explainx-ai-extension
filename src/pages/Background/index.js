@@ -28,8 +28,8 @@ async function initiateAuth() {
     // Store state temporarily
     await chrome.storage.local.set({ oauth_state: state });
 
-    // Build auth URL - use a special redirect URI that we'll intercept
-    const redirectUri = 'http://localhost:3000/extension-auth-success';
+    // Build auth URL - use dynamic API URL for redirect URI
+    const redirectUri = `${apiUrl}/extension-auth-success`;
     const authUrl =
       `${OAUTH_CONFIG.authUrl}?` +
       new URLSearchParams({
@@ -61,10 +61,10 @@ async function initiateAuth() {
             return;
           }
 
-          // Check if we reached the success page
+          // Check if we reached the success page using dynamic API URL
           if (
             tab.url &&
-            tab.url.startsWith('http://localhost:3000/extension-auth-success')
+            tab.url.startsWith(`${apiUrl}/extension-auth-success`)
           ) {
             clearInterval(checkInterval);
 
@@ -116,7 +116,7 @@ async function exchangeCodeForToken(code, state) {
       throw new Error('Invalid state parameter - possible CSRF attack');
     }
 
-    // Exchange code for token
+    // Exchange code for token using dynamic API URL for redirect URI
     const response = await fetch(OAUTH_CONFIG.tokenUrl, {
       method: 'POST',
       headers: {
@@ -125,7 +125,7 @@ async function exchangeCodeForToken(code, state) {
       body: JSON.stringify({
         client_id: OAUTH_CONFIG.clientId,
         code: code,
-        redirect_uri: 'http://localhost:3000/extension-auth-success',
+        redirect_uri: `${apiUrl}/extension-auth-success`,
         grant_type: 'authorization_code',
       }),
     });
