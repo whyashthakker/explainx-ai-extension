@@ -6,8 +6,65 @@ const Popup = () => {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [pageInfo, setPageInfo] = useState({ title: '', url: '', type: '', timestamp: null });
+  const [pageInfo, setPageInfo] = useState({
+    title: '',
+    url: '',
+    type: '',
+    timestamp: null,
+  });
   const [hasStoredContent, setHasStoredContent] = useState(false);
+
+  // Add authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // Check authentication status
+  const checkAuthStatus = async () => {
+    try {
+      const response = await new Promise((resolve) => {
+        chrome.runtime.sendMessage({ action: 'getAuthStatus' }, resolve);
+      });
+
+      setIsAuthenticated(response.isAuthenticated);
+      setUser(response.user);
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+    }
+  };
+
+  // Handle login
+  const handleLogin = async () => {
+    setAuthLoading(true);
+    try {
+      await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({ action: 'initiateAuth' }, (response) => {
+          if (response.success) {
+            resolve();
+          } else {
+            reject(new Error(response.error));
+          }
+        });
+      });
+    } catch (error) {
+      setError('Authentication failed: ' + error.message);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await new Promise((resolve) => {
+        chrome.runtime.sendMessage({ action: 'logout' }, resolve);
+      });
+      setIsAuthenticated(false);
+      setUser(null);
+    } catch (error) {
+      setError('Logout failed: ' + error.message);
+    }
+  };
 
   const fetchStoredContent = async () => {
     setLoading(true);
@@ -31,14 +88,16 @@ const Popup = () => {
           title: response.title,
           url: response.url,
           type: response.type,
-          timestamp: response.timestamp
+          timestamp: response.timestamp,
         });
         setHasStoredContent(true);
       } else {
         setContent('');
         setPageInfo({ title: '', url: '', type: '', timestamp: null });
         setHasStoredContent(false);
-        setError('No content extracted yet. Click the floating "Extract" button on any webpage to capture content.');
+        setError(
+          'No content extracted yet. Click the floating "Extract" button on any webpage to capture content.'
+        );
       }
     } catch (err) {
       setError('Error: ' + err.message);
@@ -63,35 +122,46 @@ const Popup = () => {
       setContent('');
       setPageInfo({ title: '', url: '', type: '', timestamp: null });
       setHasStoredContent(false);
-      setError('Content cleared. Use the floating button to extract new content.');
+      setError(
+        'Content cleared. Use the floating button to extract new content.'
+      );
     } catch (err) {
       setError('Error clearing content: ' + err.message);
     }
   };
 
   useEffect(() => {
+    checkAuthStatus();
     fetchStoredContent();
-    
-    // Listen for storage changes to auto-update popup
+
+    // Listen for auth changes
     const handleStorageChange = (changes, namespace) => {
-      if (namespace === 'local' && changes.explainx_extracted_content) {
-        fetchStoredContent();
+      if (namespace === 'local') {
+        if (changes.access_token || changes.user_info) {
+          checkAuthStatus();
+        }
+        if (changes.explainx_extracted_content) {
+          fetchStoredContent();
+        }
       }
     };
-    
+
     chrome.storage.onChanged.addListener(handleStorageChange);
-    
+
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
     };
   }, []);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(content).then(() => {
-      alert('Content copied to clipboard!');
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
-    });
+    navigator.clipboard
+      .writeText(content)
+      .then(() => {
+        alert('Content copied to clipboard!');
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err);
+      });
   };
 
   const refreshContent = () => {
@@ -116,11 +186,40 @@ const Popup = () => {
         <img src={logo} className="popup-logo" alt="ExplainX Logo" />
         <h1 className="popup-title">ExplainX</h1>
       </header>
-      
+
       <div className="popup-content">
+        {/* Authentication Section */}
+        <div className="auth-section">
+          {isAuthenticated ? (
+            <div className="user-info">
+              <div className="user-details">
+                <span>👋 {user?.name || user?.email}</span>
+                <button onClick={handleLogout} className="logout-btn">
+                  Logout
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="login-section">
+              <p>
+                Connect your ExplainX account to sync your extracted content
+              </p>
+              <button
+                onClick={handleLogin}
+                className="login-btn"
+                disabled={authLoading}
+              >
+                {authLoading ? 'Connecting...' : 'Connect Account'}
+              </button>
+            </div>
+          )}
+        </div>
+
         {pageInfo.title && (
           <div className="page-info">
-            <h3 className="page-title" title={pageInfo.title}>{pageInfo.title}</h3>
+            <h3 className="page-title" title={pageInfo.title}>
+              {pageInfo.title}
+            </h3>
             <p className="page-type">
               {pageInfo.type === 'youtube' ? '📹 YouTube Video' : '📄 Web Page'}
             </p>
@@ -138,7 +237,11 @@ const Popup = () => {
         )}
 
         <div className="content-actions">
-          <button onClick={refreshContent} className="action-btn refresh-btn" disabled={loading}>
+          <button
+            onClick={refreshContent}
+            className="action-btn refresh-btn"
+            disabled={loading}
+          >
             {loading ? '🔄 Loading...' : '🔄 Refresh'}
           </button>
           {content && (
@@ -146,7 +249,10 @@ const Popup = () => {
               <button onClick={copyToClipboard} className="action-btn copy-btn">
                 📋 Copy
               </button>
-              <button onClick={clearStoredContent} className="action-btn clear-btn">
+              <button
+                onClick={clearStoredContent}
+                className="action-btn clear-btn"
+              >
                 🗑️ Clear
               </button>
             </>
@@ -159,7 +265,7 @@ const Popup = () => {
               <p>Loading stored content...</p>
             </div>
           )}
-          
+
           {error && (
             <div className="error-message">
               <p>ℹ️ {error}</p>
@@ -179,12 +285,10 @@ const Popup = () => {
               </button>
             </div>
           )}
-          
+
           {content && !loading && (
             <div className="content-display">
-              <div className="content-text">
-                {content}
-              </div>
+              <div className="content-text">{content}</div>
             </div>
           )}
         </div>
