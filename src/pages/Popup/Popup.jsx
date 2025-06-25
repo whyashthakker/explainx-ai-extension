@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import logo from '../../assets/img/icon-128.png';
+import Spaces from '../../components/Spaces';
 import './Popup.css';
 
 const Popup = () => {
@@ -191,14 +192,17 @@ const Popup = () => {
         {/* Authentication Section */}
         <div className="auth-section">
           {isAuthenticated ? (
-            <div className="user-info">
-              <div className="user-details">
-                <span>👋 {user?.name || user?.email}</span>
-                <button onClick={handleLogout} className="logout-btn">
-                  Logout
-                </button>
+            <>
+              <Spaces />
+              <div className="user-info">
+                <div className="user-details">
+                  <span>👋 {user?.name || user?.email}</span>
+                  <button onClick={handleLogout} className="logout-btn">
+                    Logout
+                  </button>
+                </div>
               </div>
-            </div>
+            </>
           ) : (
             <div className="login-section">
               <p>

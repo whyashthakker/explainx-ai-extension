@@ -1,0 +1,246 @@
+/* src/components/Spaces/Spaces.css */
+.spaces-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.spaces-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+.spaces-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.refresh-spaces-btn {
+    padding: 6px 8px;
+    background: #e5e7eb;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.refresh-spaces-btn:hover:not(:disabled) {
+    background: #d1d5db;
+}
+
+.refresh-spaces-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.spaces-loading,
+.spaces-error,
+.no-spaces {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.spaces-error p {
+    margin: 0 0 12px 0;
+    color: #dc2626;
+}
+
+.no-spaces-hint {
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.spaces-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.space-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.space-item:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.space-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.space-name {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.space-description {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.space-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.space-visibility,
+.space-materials {
+    white-space: nowrap;
+}
+
+.space-actions {
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.save-to-space-btn {
+    padding: 6px 12px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+}
+
+.save-to-space-btn:hover:not(:disabled) {
+    background: #059669;
+}
+
+.save-to-space-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Auth Form Styles */
+.auth-form {
+    padding: 20px;
+    text-align: center;
+}
+
+.auth-form h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.auth-form p {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.auth-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.auth-submit,
+.auth-cancel {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.auth-submit {
+    background: #3b82f6;
+    color: white;
+}
+
+.auth-submit:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.auth-submit:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.auth-cancel {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.auth-cancel:hover {
+    background: #d1d5db;
+}
+
+.auth-help {
+    margin: 16px 0 0 0;
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.retry-btn {
+    padding: 6px 12px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.retry-btn:hover {
+    background: #2563eb;
+}

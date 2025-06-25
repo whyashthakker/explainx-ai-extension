@@ -1,9 +1,9 @@
-import DEV_MODE from '../Constants/index.js';
+import { DEV_MODE } from '../Constants/index.js';
 
 console.log('ExplainX Extension Background Script Running');
 
-// const apiUrl = DEV_MODE ? 'http://localhost:3000' : 'https://yourapp.com';
-const apiUrl = 'http://localhost:3000';
+const apiUrl = DEV_MODE ? 'http://localhost:3000' : 'https://learn.explainx.ai';
+// const apiUrl = 'http://localhost:3000'
 
 const OAUTH_CONFIG = {
   clientId: 'explainx-extension',
