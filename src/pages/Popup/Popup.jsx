@@ -232,69 +232,103 @@ const Popup = () => {
   // Create current content object for Spaces component
   const currentContent = hasStoredContent
     ? {
-        title: pageInfo.title,
-        content: content,
-        type: pageInfo.type,
-        url: pageInfo.url,
-        timestamp: pageInfo.timestamp,
-      }
+      title: pageInfo.title,
+      content: content,
+      type: pageInfo.type,
+      url: pageInfo.url,
+      timestamp: pageInfo.timestamp,
+    }
     : null;
 
   return (
     <div className="popup-container">
-      <header className="popup-header">
-        <img src={logo} className="popup-logo" alt="ExplainX Logo" />
-        <h1 className="popup-title">ExplainX</h1>
-        <button
-          onClick={openOptionsPage}
-          className="settings-btn"
-          title="Open Settings"
-        >
-          ⚙️
-        </button>
-      </header>
+      {/* Show header only if authenticated */}
+      {isAuthenticated && (
+        <header className="popup-header compact-popup-header">
+          <img src={logo} className="popup-logo compact-popup-logo" alt="ExplainX Logo" />
+          <h1 className="popup-title compact-popup-title">ExplainX</h1>
 
+        </header>
+      )}
       <div className="popup-content">
-        {/* Navigation Tabs */}
-        <div className="tab-navigation">
-          <button
-            className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
-            onClick={() => setActiveTab('content')}
-          >
-            📄 Content
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'spaces' ? 'active' : ''}`}
-            onClick={() => setActiveTab('spaces')}
-            disabled={!isAuthenticated}
-          >
-            📚 My Spaces
-          </button>
-        </div>
-
-        {/* Authentication Section */}
-        {!isAuthenticated && (
-          <div className="auth-section">
-            <div className="login-section">
-              <p>
-                Connect your ExplainX account to save content to your spaces
-              </p>
+        {/* Show only the welcome screen if not authenticated */}
+        {!isAuthenticated ? (
+          <div className="welcome-section" style={{ padding: '32px 0', textAlign: 'center' }}>
+            <img
+              src={logo}
+              alt="Explainx Logo"
+              style={{ width: 88, height: 88, borderRadius: 20, marginBottom: 24, boxShadow: '0 4px 24px rgba(59,130,246,0.10)' }}
+            />
+            <h2 style={{ fontSize: 28, fontWeight: 800, margin: '0 0 8px 0', color: '#22223b' }}>Welcome to ExplainX</h2>
+            <div style={{ fontSize: 17, color: '#64748b', marginBottom: 32 }}>
+              AI-powered social media assistant
+            </div>
+            <div style={{ maxWidth: 380, margin: '0 auto 32px auto', textAlign: 'left', background: '#f8fafc', borderRadius: 16, padding: 24, border: '1px solid #e5e7eb' }}>
+              <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 18, color: '#22223b' }}>
+                Streamline your learning engagement with ExplainX
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <span style={{ color: '#14b8a6', fontWeight: 700, minWidth: 28 }}>01</span>
+                  <div>
+                    <span style={{ fontWeight: 700 }}>YouTube Summaries</span><br />
+                    <span style={{ color: '#64748b', fontWeight: 500 }}>Automatically summarize YouTube videos</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <span style={{ color: '#14b8a6', fontWeight: 700, minWidth: 28 }}>02</span>
+                  <div>
+                    <span style={{ fontWeight: 700 }}>Smart Summaries</span><br />
+                    <span style={{ color: '#64748b', fontWeight: 500 }}>Generate contextual summaries in seconds</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <span style={{ color: '#14b8a6', fontWeight: 700, minWidth: 28 }}>03</span>
+                  <div>
+                    <span style={{ fontWeight: 700 }}>Free & Premium Options</span><br />
+                    <span style={{ color: '#64748b', fontWeight: 500 }}>Start with basic features, upgrade when ready</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleLogin}
+              className="button"
+              disabled={authLoading}
+              style={{ fontSize: 18, width: 320, maxWidth: '90%', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10 }}
+            >
+              {authLoading ? 'Connecting...' : 'Connect Account'}
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Navigation Tabs */}
+            <div className="tab-navigation compact-tab-navigation">
               <button
-                onClick={handleLogin}
-                className="login-btn"
-                disabled={authLoading}
+                className={`button button-white compact-tab-btn ${activeTab === 'content' ? 'active' : ''}`}
+                onClick={() => setActiveTab('content')}
               >
-                {authLoading ? 'Connecting...' : 'Connect Account'}
+                Content
+              </button>
+              <button
+                className={`button button-white compact-tab-btn ${activeTab === 'spaces' ? 'active' : ''}`}
+                onClick={() => setActiveTab('spaces')}
+                disabled={!isAuthenticated}
+              >
+                My Spaces
               </button>
             </div>
-          </div>
-        )}
 
-        {/* User Info Bar (when authenticated) */}
-        {isAuthenticated && (
-          <div className="user-info-bar">
-            <div className="user-details">
-              <div className="user-greeting-section">
+            {/* User Info Bar (when authenticated) */}
+            <div className="user-info-bar modern-user-info-bar ">
+              <div className="modern-user-avatar">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="avatar" />
+                ) : (
+                  <span>{user?.name ? user.name[0].toUpperCase() : '👤'}</span>
+                )}
+              </div>
+              <div className="user-greeting-section compact-user-greeting-section">
                 <span className="user-greeting">
                   👋 {user?.name || user?.email}
                 </span>
@@ -309,40 +343,40 @@ const Popup = () => {
                   </div>
                 )}
               </div>
-              <div className="user-actions">
+              <div className="user-actions modern-user-actions compact-user-actions">
                 <button
                   onClick={syncUserData}
-                  className="sync-btn"
+                  className="button button-neutral"
                   disabled={syncLoading}
                   title="Sync your data from server"
                 >
-                  {syncLoading ? '🔄' : '🔄'}
+                  {syncLoading ? 'Syncing...' : '🔄 Sync'}
                 </button>
-                <button onClick={handleLogout} className="logout-btn">
+                <button onClick={handleLogout} className="button button-danger">
                   Logout
                 </button>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Content Tab */}
-        {activeTab === 'content' && (
-          <>
-            <Content />
+            {/* Content Tab */}
+            {activeTab === 'content' && (
+              <>
+                <Content />
+              </>
+            )}
+
+            {/* Spaces Tab */}
+            {activeTab === 'spaces' && isAuthenticated && (
+              <div className="spaces-tab-content">
+                <Spaces
+                  currentContent={currentContent}
+                  onSpaceSelect={(space) => {
+                    console.log('Space selected:', space);
+                  }}
+                />
+              </div>
+            )}
           </>
-        )}
-
-        {/* Spaces Tab */}
-        {activeTab === 'spaces' && isAuthenticated && (
-          <div className="spaces-tab-content">
-            <Spaces
-              currentContent={currentContent}
-              onSpaceSelect={(space) => {
-                console.log('Space selected:', space);
-              }}
-            />
-          </div>
         )}
       </div>
     </div>

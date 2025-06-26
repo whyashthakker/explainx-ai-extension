@@ -99,10 +99,20 @@ const Content = () => {
     navigator.clipboard
       .writeText(content)
       .then(() => {
-        alert('Content copied to clipboard!');
+        // Create a subtle success feedback
+        const btn = document.querySelector('.copy-btn');
+        const originalText = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        btn.style.background = '#10b981'; // Green for success
+
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = '#8b5cf6'; // Back to purple
+        }, 2000);
       })
       .catch((err) => {
         console.error('Failed to copy: ', err);
+        alert('Failed to copy content. Please try again.');
       });
   };
 
@@ -113,7 +123,12 @@ const Content = () => {
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
-    return date.toLocaleString();
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const openSourceUrl = () => {
@@ -122,85 +137,132 @@ const Content = () => {
     }
   };
 
+  const getPageTypeDisplay = (type) => {
+    switch (type) {
+      case 'youtube':
+        return (
+          <>
+            <span className="page-type-icon">🎥</span>
+            YouTube Video
+          </>
+        );
+      default:
+        return (
+          <>
+            <span className="page-type-icon">🌐</span>
+            Web Page
+          </>
+        );
+    }
+  };
+
   return (
-    <div className="content-container">
+    <div className="content-container compact-content-container">
       {/* Page Info Section */}
       {pageInfo.title && (
-        <div className="page-info">
-          <h3 className="page-title" title={pageInfo.title}>
-            {pageInfo.title}
-          </h3>
-          <p className="page-type">
-            {pageInfo.type === 'youtube' ? '📹 YouTube Video' : '📄 Web Page'}
-          </p>
-          {pageInfo.timestamp && (
-            <p className="page-timestamp">
-              Extracted: {formatTimestamp(pageInfo.timestamp)}
-            </p>
-          )}
-          {pageInfo.url && (
-            <button onClick={openSourceUrl} className="source-link-btn">
-              🔗 Open Source
-            </button>
-          )}
+        <div className="page-info compact-page-info">
+          <div className="compact-page-info-main">
+            <div className="compact-page-info-icon">
+              {pageInfo.type === 'youtube' ? '🎥' : '🌐'}
+            </div>
+            <div className="compact-page-info-details">
+              <h3 className="page-title compact-page-title" title={pageInfo.title}>
+                {pageInfo.title}
+              </h3>
+              {pageInfo.timestamp && (
+                <span className="page-timestamp compact-page-timestamp">
+                  {formatTimestamp(pageInfo.timestamp)}
+                </span>
+              )}
+            </div>
+            {pageInfo.url && (
+              <button onClick={openSourceUrl} className="button button-white compact-source-link-btn">
+                <span>🔗</span>
+                Source
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {/* Content Actions */}
-      <div className="content-actions">
+      <div className="content-actions compact-content-actions">
         <button
           onClick={refreshContent}
-          className="action-btn refresh-btn"
+          className="button button-neutral compact-action-btn"
           disabled={loading}
         >
-          {loading ? '🔄 Loading...' : '🔄 Refresh'}
+          <span>{loading ? '⟳' : '🔄'}</span>
+          {loading ? 'Loading...' : 'Refresh'}
         </button>
         {content && (
           <>
-            <button onClick={copyToClipboard} className="action-btn copy-btn">
-              📋 Copy
+            <button onClick={copyToClipboard} className="button button-white compact-action-btn">
+              <span>📋</span>
+              Copy
             </button>
             <button
               onClick={clearStoredContent}
-              className="action-btn clear-btn"
+              className="button button-danger compact-action-btn"
             >
-              🗑️ Clear
+              <span>🗑️</span>
+              Clear
             </button>
           </>
         )}
       </div>
 
       {/* Content Area */}
-      <div className="content-area">
+      <div className="content-area compact-content-area">
         {loading && (
-          <div className="loading-message">
-            <p>Loading stored content...</p>
+          <div className="loading-message compact-loading-message">
+            <p>✨ Loading your extracted content...</p>
           </div>
         )}
 
         {error && (
-          <div className="error-message">
+          <div className="error-message compact-error-message">
             <p>ℹ️ {error}</p>
             {!hasStoredContent && (
-              <div className="instructions">
-                <h4>How to use ExplainX:</h4>
+              <div className="instructions compact-instructions">
+                <h4>🚀 Getting Started with ExplainX</h4>
                 <ol>
-                  <li>Go to any webpage or YouTube video</li>
-                  <li>Look for the floating purple "Extract" button</li>
-                  <li>Click it to extract content</li>
-                  <li>Return here to view the extracted content</li>
+                  <li>
+                    <strong>Navigate</strong> to any webpage or YouTube video you want to analyze
+                  </li>
+                  <li>
+                    <strong>Look for</strong> the floating purple "Extract" button on the page
+                  </li>
+                  <li>
+                    <strong>Click</strong> the button to extract and process the content
+                  </li>
+                  <li>
+                    <strong>Return here</strong> to view, copy, or analyze your extracted content
+                  </li>
                 </ol>
+                <div style={{
+                  marginTop: '12px',
+                  padding: '10px',
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.07) 0%, rgba(147, 51, 234, 0.07) 100%)',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  color: '#475569',
+                  fontWeight: '500'
+                }}>
+                  💡 <strong>Pro Tip:</strong> The extraction works on most websites, articles, and YouTube videos. Perfect for research and learning!
+                </div>
               </div>
             )}
-            <button onClick={refreshContent} className="retry-btn">
+            <button onClick={refreshContent} className="button button-neutral compact-retry-btn">
+              <span>🔍</span>
               Check Again
             </button>
           </div>
         )}
 
         {content && !loading && (
-          <div className="content-display">
-            <div className="content-text">{content}</div>
+          <div className="content-display compact-content-display">
+            <div className="content-text compact-content-text">{content}</div>
           </div>
         )}
       </div>

@@ -12,6 +12,7 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
   const [savedToSpace, setSavedToSpace] = useState(null);
   const [authToken, setAuthToken] = useState(null);
   const [toast, setToast] = useState(null);
+  const [shadToast, setShadToast] = useState(null);
 
   // Configuration
   const API_BASE_URL = DEV_MODE
@@ -117,8 +118,7 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
         sourceUrl: currentContent.url || window.location.href,
         description:
           currentContent.description ||
-          `Content extracted from ${
-            currentContent.type === 'youtube' ? 'YouTube video' : 'web page'
+          `Content extracted from ${currentContent.type === 'youtube' ? 'YouTube video' : 'web page'
           } on ${new Date().toLocaleDateString()}`,
       };
 
@@ -142,7 +142,8 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
       const result = await response.json();
 
       // Show success message with more details
-      showToast('Study material saved successfully!', 'success');
+      setShadToast('Study material saved successfully!');
+      setTimeout(() => setShadToast(null), 2500);
       currentContent = null;
 
       console.log('Content saved successfully:', result);
@@ -191,8 +192,7 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
       if (response.ok) {
         const data = await response.json();
         showToast(
-          `✅ Connection successful!\nAuthenticated as: ${
-            data.user.name || data.user.email
+          `✅ Connection successful!\nAuthenticated as: ${data.user.name || data.user.email
           }`,
           'success'
         );
@@ -208,13 +208,13 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
   };
 
   return (
-    <div className="spaces-container">
-      <div className="spaces-header">
-        <h3>My Spaces</h3>
-        <div className="header-actions">
+    <div className="spaces-container compact-spaces-container">
+      <div className="spaces-header compact-spaces-header">
+        <h3 className="compact-spaces-title">My Spaces</h3>
+        <div className="header-actions compact-header-actions">
           <button
             onClick={async () => await loadSpaces(authToken)}
-            className="refresh-spaces-btn"
+            className="button button-neutral compact-refresh-spaces-btn"
             disabled={loading}
             title="Refresh spaces"
           >
@@ -224,15 +224,15 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
       </div>
 
       {loading && (
-        <div className="spaces-loading">
+        <div className="spaces-loading compact-spaces-loading">
           <p>Loading your spaces...</p>
         </div>
       )}
 
       {error && (
-        <div className="spaces-error">
+        <div className="spaces-error compact-spaces-error">
           <p>{error}</p>
-          <button onClick={loadSpaces} className="retry-btn">
+          <button onClick={loadSpaces} className="button button-danger compact-retry-btn">
             Try Again
           </button>
         </div>
@@ -241,39 +241,38 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
       {!loading && !error && (
         <>
           {spaces.length === 0 ? (
-            <div className="no-spaces">
+            <div className="no-spaces compact-no-spaces">
               <p>No spaces found.</p>
-              <p className="no-spaces-hint">
+              <p className="no-spaces-hint compact-no-spaces-hint">
                 Create your first space in the web app!
               </p>
             </div>
           ) : (
-            <div className="spaces-list">
+            <div className="spaces-list compact-spaces-list">
               {spaces.map((space) => (
-                <div key={space.id} className="space-item">
-                  <div className="space-info">
-                    <h4 className="space-name">{space.name}</h4>
+                <div key={space.id} className="space-item compact-space-item">
+                  <div className="space-info compact-space-info">
+                    <h4 className="space-name compact-space-name">{space.name}</h4>
                     {space.description && (
-                      <p className="space-description">{space.description}</p>
+                      <p className="space-description compact-space-description">{space.description}</p>
                     )}
-                    <div className="space-meta">
-                      <span className="space-visibility">
+                    <div className="space-meta compact-space-meta">
+                      <span className="space-visibility compact-space-visibility">
                         {space.isPublic ? '🌐 Public' : '🔒 Private'}
                       </span>
-                      <span className="space-materials">
+                      <span className="space-materials compact-space-materials">
                         📚 {space._count?.studyMaterials || 0} materials
                       </span>
                     </div>
                   </div>
 
-                  <div className="space-actions">
+                  <div className="space-actions compact-space-actions">
                     <button
                       onClick={() => saveToSpace(space)}
-                      className={`save-to-space-btn ${
-                        !currentContent || savingToSpace === space.id
-                          ? 'disabled'
-                          : 'enabled'
-                      }`}
+                      className={`button button-white compact-save-to-space-btn ${!currentContent || savingToSpace === space.id
+                        ? 'disabled'
+                        : 'enabled'
+                        }`}
                       disabled={!currentContent || savingToSpace === space.id}
                       title={
                         !currentContent
@@ -295,13 +294,13 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
 
       {/* Enhanced status indicator */}
       {currentContent && (
-        <div className="content-status">
-          <div className="content-preview">
-            <h5>📄 Ready to Save:</h5>
-            <p className="content-title">
+        <div className="content-status compact-content-status">
+          <div className="content-preview compact-content-preview">
+            <h5 className="compact-content-preview-title">📄 Ready to Save:</h5>
+            <p className="content-title compact-content-title">
               {currentContent.title || 'Untitled Content'}
             </p>
-            <p className="content-meta">
+            <p className="content-meta compact-content-meta">
               {currentContent.type} •{' '}
               {(currentContent.content?.length || 0).toLocaleString()}{' '}
               characters
@@ -312,13 +311,20 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
 
       {/* Toast notification */}
       {toast && (
-        <div className={`toast ${toast.type}`}>
-          <div className="toast-content">
-            <span className="toast-icon">
+        <div className={`toast compact-toast ${toast.type}`}>
+          <div className="toast-content compact-toast-content">
+            <span className="toast-icon compact-toast-icon">
               {toast.type === 'success' ? '✅' : '❌'}
             </span>
-            <span className="toast-message">{toast.message}</span>
+            <span className="toast-message compact-toast-message">{toast.message}</span>
           </div>
+        </div>
+      )}
+      {/* Shadcn-like toast */}
+      {shadToast && (
+        <div className="shadcn-toast">
+          <span className="shadcn-toast-icon">✅</span>
+          <span className="shadcn-toast-message">{shadToast}</span>
         </div>
       )}
     </div>
