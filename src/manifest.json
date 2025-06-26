@@ -21,7 +21,9 @@
     "tabs"
   ],
   "host_permissions": [
-    "*://*.youtube.com/*"
+    "*://*.youtube.com/*",
+    "http://localhost:3000/*",
+    "https://learn.explainx.ai/*"
   ],
   "icons": {
     "16": "icon-34.png",
