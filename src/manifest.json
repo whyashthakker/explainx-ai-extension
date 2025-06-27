@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "ExplainX - YouTube Transcript Viewer",
-  "description": "View YouTube transcripts in a convenient popup",
+  "name": "ExplainX - AI Learning Assistant",
+  "description": "Your AI Powered Teacher, a new way to learn",
   "options_page": "options.html",
   "background": { "service_worker": "background.bundle.js" },
   "action": {
@@ -12,7 +12,7 @@
       "48": "icon-128.png",
       "128": "icon-128.png"
     },
-    "default_title": "ExplainX - Extract YouTube Transcript"
+    "default_title": "ExplainX - AI Learning Assistant"
   },
   "permissions": [
     "activeTab",
