@@ -4,6 +4,8 @@ import Spaces from '../../components/Spaces';
 import Content from '../../components/Content';
 import './Popup.css';
 import { DEV_MODE } from '../Constants/';
+import { BookCheck, Box, Settings } from 'lucide-react';
+
 const Popup = () => {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,8 +24,8 @@ const Popup = () => {
   const [authLoading, setAuthLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
 
-  // Add view state for tabs
-  const [activeTab, setActiveTab] = useState('content'); // 'content' or 'spaces'
+  // Add view state for tabs - now includes settings
+  const [activeTab, setActiveTab] = useState('content'); // 'content', 'spaces', or 'settings'
 
   // Configuration - Check if we're in development mode
   const isDev = DEV_MODE;
@@ -242,14 +244,19 @@ const Popup = () => {
 
   return (
     <div className="popup-container">
-      {/* Show header only if authenticated */}
-      {isAuthenticated && (
-        <header className="popup-header compact-popup-header">
-          <img src={logo} className="popup-logo compact-popup-logo" alt="ExplainX Logo" />
-          <h1 className="popup-title compact-popup-title">ExplainX</h1>
+      {/* Minimal header - always visible */}
+      <header className="popup-header minimal-popup-header">
+        <img src={logo} className="popup-logo minimal-popup-logo" alt="ExplainX Logo" />
+        <h1 className="popup-title minimal-popup-title">ExplainX</h1>
 
-        </header>
-      )}
+        {/* Quick status indicator when authenticated */}
+        {isAuthenticated && (
+          <div className="quick-status-indicator">
+            <div className="status-dot" title={`Logged in as ${user?.name || user?.email}`}></div>
+          </div>
+        )}
+      </header>
+
       <div className="popup-content">
         {/* Show only the welcome screen if not authenticated */}
         {!isAuthenticated ? (
@@ -302,66 +309,35 @@ const Popup = () => {
           </div>
         ) : (
           <>
-            {/* Navigation Tabs */}
-            <div className="tab-navigation compact-tab-navigation">
+            {/* Compact Navigation Tabs with Settings */}
+            <div className="tab-navigation ultra-compact-tab-navigation">
               <button
-                className={`button button-white compact-tab-btn ${activeTab === 'content' ? 'active' : ''}`}
+                className={`tab-btn ultra-compact-tab-btn ${activeTab === 'content' ? 'active' : ''}`}
                 onClick={() => setActiveTab('content')}
               >
+                <BookCheck size={14} />
                 Content
               </button>
               <button
-                className={`button button-white compact-tab-btn ${activeTab === 'spaces' ? 'active' : ''}`}
+                className={`tab-btn ultra-compact-tab-btn ${activeTab === 'spaces' ? 'active' : ''}`}
                 onClick={() => setActiveTab('spaces')}
                 disabled={!isAuthenticated}
               >
-                My Spaces
+                <Box size={14} /> Spaces
               </button>
-            </div>
-
-            {/* User Info Bar (when authenticated) */}
-            <div className="user-info-bar modern-user-info-bar ">
-              <div className="modern-user-avatar">
-                {user?.avatarUrl ? (
-                  <img src={user.avatarUrl} alt="avatar" />
-                ) : (
-                  <span>{user?.name ? user.name[0].toUpperCase() : '👤'}</span>
-                )}
-              </div>
-              <div className="user-greeting-section compact-user-greeting-section">
-                <span className="user-greeting">
-                  👋 {user?.name || user?.email}
-                </span>
-                {user?.totalSpaces !== undefined && (
-                  <div className="user-stats">
-                    <span className="stat-item">
-                      📚 {user.totalSpaces} spaces
-                    </span>
-                    <span className="stat-item">
-                      📄 {user.totalStudyMaterials} materials
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="user-actions modern-user-actions compact-user-actions">
-                <button
-                  onClick={syncUserData}
-                  className="button button-neutral"
-                  disabled={syncLoading}
-                  title="Sync your data from server"
-                >
-                  {syncLoading ? 'Syncing...' : '🔄 Sync'}
-                </button>
-                <button onClick={handleLogout} className="button button-danger">
-                  Logout
-                </button>
-              </div>
+              <button
+                className={`tab-btn ultra-compact-tab-btn settings-tab ${activeTab === 'settings' ? 'active' : ''}`}
+                onClick={() => setActiveTab('settings')}
+                title="Settings & Account"
+              >
+                <Settings size={14} />
+              </button>
             </div>
 
             {/* Content Tab */}
             {activeTab === 'content' && (
               <>
-                <Content />
+                <Content onSaveToSpace={() => setActiveTab('spaces')} />
               </>
             )}
 
@@ -374,6 +350,106 @@ const Popup = () => {
                     console.log('Space selected:', space);
                   }}
                 />
+              </div>
+            )}
+
+            {/* Settings Tab */}
+            {activeTab === 'settings' && isAuthenticated && (
+              <div className="settings-tab-content">
+                <div className="settings-container">
+                  {/* User Profile Section */}
+                  <div className="settings-section">
+                    <h3 className="settings-section-title">👤 Account</h3>
+                    <div className="user-profile-card">
+                      <div className="user-profile-avatar">
+                        {user?.avatarUrl ? (
+                          <img src={user.avatarUrl} alt="avatar" />
+                        ) : (
+                          <span>{user?.name ? user.name[0].toUpperCase() : '👤'}</span>
+                        )}
+                      </div>
+                      <div className="user-profile-info">
+                        <div className="user-profile-name">
+                          {user?.name || 'Anonymous User'}
+                        </div>
+                        <div className="user-profile-email">
+                          {user?.email || 'No email provided'}
+                        </div>
+                        <div className="user-profile-stats">
+                          <span className="profile-stat">
+                            📚 {user?.totalSpaces || 0} spaces
+                          </span>
+                          <span className="profile-stat">
+                            📄 {user?.totalStudyMaterials || 0} materials
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions Section */}
+                  <div className="settings-section">
+                    <h3 className="settings-section-title">🔄 Actions</h3>
+                    <div className="settings-actions">
+                      <button
+                        onClick={syncUserData}
+                        className="settings-action-btn"
+                        disabled={syncLoading}
+                      >
+                        <span className="action-icon">🔄</span>
+                        <div className="action-content">
+                          <div className="action-title">
+                            {syncLoading ? 'Syncing...' : 'Sync Data'}
+                          </div>
+                          <div className="action-description">
+                            Refresh your spaces and materials
+                          </div>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={openOptionsPage}
+                        className="settings-action-btn"
+                      >
+                        <span className="action-icon">🛠️</span>
+                        <div className="action-content">
+                          <div className="action-title">Extension Settings</div>
+                          <div className="action-description">
+                            Configure extension preferences
+                          </div>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={handleLogout}
+                        className="settings-action-btn logout-action"
+                      >
+                        <span className="action-icon">🚪</span>
+                        <div className="action-content">
+                          <div className="action-title">Logout</div>
+                          <div className="action-description">
+                            Sign out of your account
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* App Info Section */}
+                  <div className="settings-section">
+                    <h3 className="settings-section-title">ℹ️ About</h3>
+                    <div className="app-info">
+                      <div className="info-item">
+                        <span className="info-label">Version:</span>
+                        <span className="info-value">1.0.0</span>
+                      </div>
+                      <div className="info-item">
+                        <span className="info-label">Environment:</span>
+                        <span className="info-value">{isDev ? 'Development' : 'Production'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </>

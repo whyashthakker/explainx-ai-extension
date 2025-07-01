@@ -1,8 +1,9 @@
 // src/components/Content/Content.jsx
 import React, { useState, useEffect } from 'react';
 import './Content.css';
+import { RefreshCw, Trash2, Copy, ExternalLink, Info, Rocket, Search, FileText, Globe, Youtube, CheckCircle, XCircle, Loader, Box } from 'lucide-react';
 
-const Content = () => {
+const Content = ({ onSaveToSpace }) => {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -13,6 +14,8 @@ const Content = () => {
     timestamp: null,
   });
   const [hasStoredContent, setHasStoredContent] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetchStoredContent();
@@ -99,16 +102,8 @@ const Content = () => {
     navigator.clipboard
       .writeText(content)
       .then(() => {
-        // Create a subtle success feedback
-        const btn = document.querySelector('.copy-btn');
-        const originalText = btn.textContent;
-        btn.textContent = '✅ Copied!';
-        btn.style.background = '#10b981'; // Green for success
-
-        setTimeout(() => {
-          btn.textContent = originalText;
-          btn.style.background = '#8b5cf6'; // Back to purple
-        }, 2000);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       })
       .catch((err) => {
         console.error('Failed to copy: ', err);
@@ -156,6 +151,17 @@ const Content = () => {
     }
   };
 
+  const getYouTubeVideoId = (url) => {
+    // Extracts the video ID from a YouTube URL
+    const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(regExp);
+    return match ? match[1] : '';
+  };
+
+  const handleShowTranscript = () => {
+    setShowTranscript((prev) => !prev);
+  };
+
   return (
     <div className="content-container compact-content-container">
       {/* Page Info Section */}
@@ -163,7 +169,7 @@ const Content = () => {
         <div className="page-info compact-page-info">
           <div className="compact-page-info-main">
             <div className="compact-page-info-icon">
-              {pageInfo.type === 'youtube' ? '🎥' : '🌐'}
+              {pageInfo.type === 'youtube' ? <Youtube size={20} /> : <Globe size={20} />}
             </div>
             <div className="compact-page-info-details">
               <h3 className="page-title compact-page-title" title={pageInfo.title}>
@@ -177,95 +183,159 @@ const Content = () => {
             </div>
             {pageInfo.url && (
               <button onClick={openSourceUrl} className="button button-white compact-source-link-btn">
-                <span>🔗</span>
+                <ExternalLink size={16} />
                 Source
               </button>
             )}
           </div>
+
+          {content && !loading && (
+            <div className="content-display compact-content-display">
+              {pageInfo.type === 'youtube' && pageInfo.url ? (
+                <div className="content-video compact-content-video">
+                  {/* Embed YouTube video */}
+                  <iframe
+                    width="100%"
+                    height="250"
+                    src={`https://www.youtube.com/embed/${getYouTubeVideoId(pageInfo.url)}`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    style={{ borderRadius: '12px', background: '#000' }}
+                  ></iframe>
+                </div>
+              ) : (
+                <div className="content-text compact-content-text">{content}</div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
       {/* Content Actions */}
-      <div className="content-actions compact-content-actions">
-        <button
-          onClick={refreshContent}
-          className="button button-neutral compact-action-btn"
-          disabled={loading}
-        >
-          <span>{loading ? '⟳' : '🔄'}</span>
-          {loading ? 'Loading...' : 'Refresh'}
-        </button>
-        {content && (
-          <>
-            <button onClick={copyToClipboard} className="button button-white compact-action-btn">
-              <span>📋</span>
-              Copy
-            </button>
+      {content && (
+        <div className="content-actions compact-content-actions">
+
+
+
+
+          <button
+            onClick={onSaveToSpace}
+            className="button button-white compact-action-btn"
+          >
+            <Box size={16} />
+            Add to Space
+          </button>
+          {content && (
             <button
-              onClick={clearStoredContent}
-              className="button button-danger compact-action-btn"
+              onClick={handleShowTranscript}
+              className="button button-white compact-action-btn"
             >
-              <span>🗑️</span>
-              Clear
+              <FileText size={16} />
+              {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
             </button>
-          </>
-        )}
-      </div>
+          )}
+
+          <button onClick={copyToClipboard} className="copy-btn button button-white compact-action-btn">
+            <Copy size={16} />
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+          <button
+            onClick={refreshContent}
+            className="button button-white compact-action-btn"
+            disabled={loading}
+          >
+            <span>{loading ? <Loader size={16} className="spin" /> : <RefreshCw size={16} />}</span>
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
+          <button
+            onClick={clearStoredContent}
+            className="button button-danger compact-action-btn"
+          >
+            <Trash2 size={16} />
+            Clear
+          </button>
+
+
+
+        </div>
+      )}
+
+      {showTranscript && content && (
+        <div
+          style={{
+            margin: '12px 0',
+            padding: '14px',
+            borderRadius: '8px',
+            background: '#f8fafc',
+            border: '1px solid #e0e7ef',
+            minHeight: 400,
+            overflowY: 'auto',
+            fontSize: 13,
+            color: '#334155',
+            fontWeight: 500,
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {content}
+        </div>
+      )}
 
       {/* Content Area */}
-      <div className="content-area compact-content-area">
-        {loading && (
-          <div className="loading-message compact-loading-message">
-            <p>✨ Loading your extracted content...</p>
-          </div>
-        )}
+      {!hasStoredContent && (
+        <div className="content-area compact-content-area">
+          {loading && (
+            <div className="loading-message compact-loading-message">
+              <p><Loader size={20} className="spin" /> Loading your extracted content...</p>
+            </div>
+          )}
 
-        {error && (
-          <div className="error-message compact-error-message">
-            <p>ℹ️ {error}</p>
-            {!hasStoredContent && (
-              <div className="instructions compact-instructions">
-                <h4>🚀 Getting Started with ExplainX</h4>
-                <ol>
-                  <li>
-                    <strong>Navigate</strong> to any webpage or YouTube video you want to analyze
-                  </li>
-                  <li>
-                    <strong>Look for</strong> the floating purple "Extract" button on the page
-                  </li>
-                  <li>
-                    <strong>Click</strong> the button to extract and process the content
-                  </li>
-                  <li>
-                    <strong>Return here</strong> to view, copy, or analyze your extracted content
-                  </li>
-                </ol>
-                <div style={{
-                  marginTop: '12px',
-                  padding: '10px',
-                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.07) 0%, rgba(147, 51, 234, 0.07) 100%)',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  color: '#475569',
-                  fontWeight: '500'
-                }}>
-                  💡 <strong>Pro Tip:</strong> The extraction works on most websites, articles, and YouTube videos. Perfect for research and learning!
+          {error && (
+            <div className="error-message compact-error-message">
+              <p><Info size={16} /> {error}</p>
+              {!hasStoredContent && (
+                <div className="instructions compact-instructions">
+                  <h4><Rocket size={16} /> Getting Started with ExplainX</h4>
+                  <ol>
+                    <li>
+                      <strong>Navigate</strong> to any webpage or YouTube video you want to analyze
+                    </li>
+                    <li>
+                      <strong>Look for</strong> the floating purple "Extract" button on the page
+                    </li>
+                    <li>
+                      <strong>Click</strong> the button to extract and process the content
+                    </li>
+                    <li>
+                      <strong>Return here</strong> to view, copy, or analyze your extracted content
+                    </li>
+                  </ol>
+                  <div style={{
+                    marginTop: '12px',
+                    padding: '10px',
+                    background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.07) 0%, rgba(147, 51, 234, 0.07) 100%)',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    color: '#475569',
+                    fontWeight: '500'
+                  }}>
+                    <Info size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> <strong>Pro Tip:</strong> The extraction works on most websites, articles, and YouTube videos. Perfect for research and learning!
+                  </div>
                 </div>
-              </div>
-            )}
-            <button onClick={refreshContent} className="button button-neutral compact-retry-btn">
-              <span>🔍</span>
-              Check Again
-            </button>
-          </div>
-        )}
+              )}
+              <button onClick={refreshContent} className="button button-neutral compact-retry-btn">
+                <Search size={16} />
+                Check Again
+              </button>
+            </div>
+          )}
 
-        {content && !loading && (
-          <div className="content-display compact-content-display">
-            <div className="content-text compact-content-text">{content}</div>
-          </div>
-        )}
-      </div>
+
+
+        </div>
+      )}
+
     </div>
   );
 };

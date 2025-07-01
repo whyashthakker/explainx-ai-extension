@@ -1,5 +1,8 @@
 console.log('ExplainX Content Script Running');
 
+const loader = chrome.runtime.getURL('loading.gif');
+const logo = chrome.runtime.getURL('logo.png');
+
 // Create floating action button
 function createFloatingButton() {
   // Check if button already exists
@@ -11,21 +14,19 @@ function createFloatingButton() {
   button.id = 'explainx-floating-btn';
   button.innerHTML = `
     <div class="explainx-btn-content">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-      </svg>
+      <img src="${logo}" alt="ExplainX Logo" class="" style="width: 24px; height: 24px;" />
       <span class="explainx-btn-text">Extract</span>
     </div>
   `;
 
-  // Modern Styling
+  // Loom-like Styling
   button.style.cssText = `
     position: fixed;
     bottom: 24px;
     right: 24px;
     width: 56px;
     height: 56px;
-    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    background: #fff;
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -35,7 +36,7 @@ function createFloatingButton() {
     box-shadow: 0 2px 12px rgba(124, 58, 237, 0.18);
     border: 1.5px solid #e0e7ef;
     transition: all 0.22s cubic-bezier(.4,0,.2,1);
-    color: #fff;
+    color: #7c3aed;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     user-select: none;
   `;
@@ -59,12 +60,12 @@ function createFloatingButton() {
     margin: 0;
     line-height: 1;
     letter-spacing: 0.01em;
-    color: #fff;
+    color: #7c3aed;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
-    opacity: 1;
+    opacity: 0;
     transition: opacity 0.18s, width 0.18s;
     white-space: nowrap;
     overflow: hidden;
@@ -87,7 +88,7 @@ function createFloatingButton() {
     button.style.transform = 'scale(1)';
     button.style.boxShadow = '0 2px 12px rgba(124, 58, 237, 0.18)';
     btnText.style.width = '0';
-    btnText.style.opacity = '1';
+    btnText.style.opacity = '0';
     button.style.width = '56px';
     btnContent.style.justifyContent = 'center';
     btnContent.style.alignItems = 'center';
@@ -105,30 +106,38 @@ function createFloatingButton() {
 function showLoadingState() {
   const button = document.getElementById('explainx-floating-btn');
   if (button) {
-    button.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+    button.style.background = '#fff';
     button.innerHTML = `
       <div class="explainx-btn-content">
-        <div class="spinner"></div>
+        <img src="${loader}" alt="ExplainX Logo" class="" style="width: 24px; height: 24px;" />
         <span class="explainx-btn-text">Loading...</span>
       </div>
     `;
-
-    // Add spinner CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      .spinner {
-        width: 20px;
-        height: 20px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    `;
-    document.head.appendChild(style);
+    const btnContent = button.querySelector('.explainx-btn-content');
+    btnContent.style.display = 'flex';
+    btnContent.style.flexDirection = 'row';
+    btnContent.style.alignItems = 'center';
+    btnContent.style.justifyContent = 'center';
+    btnContent.style.textAlign = 'center';
+    btnContent.style.gap = '8px';
+    btnContent.style.width = '100%';
+    btnContent.style.height = '100%';
+    const btnText = button.querySelector('.explainx-btn-text');
+    btnText.style.fontSize = '13px';
+    btnText.style.fontWeight = '700';
+    btnText.style.margin = '0';
+    btnText.style.lineHeight = '1';
+    btnText.style.letterSpacing = '0.01em';
+    btnText.style.color = '#7c3aed';
+    btnText.style.display = 'flex';
+    btnText.style.alignItems = 'center';
+    btnText.style.justifyContent = 'center';
+    btnText.style.height = '100%';
+    btnText.style.opacity = '1';
+    btnText.style.transition = 'opacity 0.18s, width 0.18s';
+    btnText.style.whiteSpace = 'nowrap';
+    btnText.style.overflow = 'hidden';
+    btnText.style.width = 'auto';
   }
 }
 
@@ -136,13 +145,11 @@ function showLoadingState() {
 function showSuccessState() {
   const button = document.getElementById('explainx-floating-btn');
   if (button) {
-    button.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    button.id = 'explainx-floating-btn';
     button.innerHTML = `
       <div class="explainx-btn-content">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-        </svg>
-        <span class="explainx-btn-text">Saved!</span>
+        <img src="${logo}" alt="ExplainX Logo" class="" style="width: 24px; height: 24px;" />
+        <span class="explainx-btn-text">Extracted</span>
       </div>
     `;
 
@@ -178,15 +185,38 @@ function showErrorState() {
 function resetButtonState() {
   const button = document.getElementById('explainx-floating-btn');
   if (button) {
-    button.style.background = 'linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)';
+    button.style.background = '#fff';
     button.innerHTML = `
       <div class="explainx-btn-content">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-        </svg>
+        <img src="${logo}" alt="ExplainX Logo" class="" style="width: 24px; height: 24px;" />
         <span class="explainx-btn-text">Extract</span>
       </div>
     `;
+    const btnContent = button.querySelector('.explainx-btn-content');
+    btnContent.style.display = 'flex';
+    btnContent.style.flexDirection = 'row';
+    btnContent.style.alignItems = 'center';
+    btnContent.style.justifyContent = 'center';
+    btnContent.style.textAlign = 'center';
+    btnContent.style.gap = '8px';
+    btnContent.style.width = '100%';
+    btnContent.style.height = '100%';
+    const btnText = button.querySelector('.explainx-btn-text');
+    btnText.style.fontSize = '13px';
+    btnText.style.fontWeight = '700';
+    btnText.style.margin = '0';
+    btnText.style.lineHeight = '1';
+    btnText.style.letterSpacing = '0.01em';
+    btnText.style.color = '#7c3aed';
+    btnText.style.display = 'flex';
+    btnText.style.alignItems = 'center';
+    btnText.style.justifyContent = 'center';
+    btnText.style.height = '100%';
+    btnText.style.opacity = '0';
+    btnText.style.transition = 'opacity 0.18s, width 0.18s';
+    btnText.style.whiteSpace = 'nowrap';
+    btnText.style.overflow = 'hidden';
+    btnText.style.width = '0';
   }
 }
 
@@ -235,6 +265,9 @@ async function handleExtractContent() {
           action: 'contentExtracted',
           data: extractedData
         });
+
+        // Open the extension popup after extraction
+        chrome.runtime.sendMessage({ action: 'openPopup' });
       }
     });
 

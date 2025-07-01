@@ -95,7 +95,7 @@ async function initiateAuth() {
       // Timeout after 5 minutes
       setTimeout(() => {
         clearInterval(checkInterval);
-        chrome.tabs.remove(authTab.id).catch(() => {}); // Ignore errors if tab already closed
+        chrome.tabs.remove(authTab.id).catch(() => { }); // Ignore errors if tab already closed
         reject(new Error('Authorization timeout'));
       }, 5 * 60 * 1000);
     });
@@ -390,6 +390,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: false, error: error.message });
       });
     return true;
+  }
+
+  if (request.action === 'openPopup') {
+    // Try to open the extension popup (MV3)
+    if (chrome.action && chrome.action.openPopup) {
+      chrome.action.openPopup();
+    } else {
+      // Fallback: open popup.html in a new window
+      chrome.windows.create({
+        url: chrome.runtime.getURL('popup.html'),
+        type: 'popup',
+        width: 420,
+        height: 600
+      });
+    }
+    sendResponse({ success: true });
+    return;
   }
 });
 

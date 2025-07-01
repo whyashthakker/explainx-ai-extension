@@ -2,9 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import './Spaces.css';
 import { DEV_MODE } from '../pages/Constants/';
+import { Book, FileText, Globe, Lock, Save, Loader, RefreshCw, Search, X, CheckCircle, XCircle } from 'lucide-react';
 
 const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
   const [spaces, setSpaces] = useState([]);
+  const [filteredSpaces, setFilteredSpaces] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedSpace, setSelectedSpace] = useState(null);
@@ -35,6 +38,29 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
       setSavedToSpace(null);
     }
   }, [currentContent]);
+
+  // Filter spaces based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredSpaces(spaces);
+    } else {
+      const filtered = spaces.filter(space =>
+        space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (space.description && space.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      setFilteredSpaces(filtered);
+    }
+  }, [spaces, searchQuery]);
+
+  // Handle search input
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
 
   const checkAuthAndLoadSpaces = async () => {
     try {
@@ -84,6 +110,7 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
 
       const data = await response.json();
       setSpaces(data.spaces || []);
+      setFilteredSpaces(data.spaces || []);
     } catch (err) {
       console.error('Error loading spaces:', err);
       setError(`Failed to load spaces: ${err.message}`);
@@ -208,31 +235,61 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
   };
 
   return (
-    <div className="spaces-container compact-spaces-container">
-      <div className="spaces-header compact-spaces-header">
-        <h3 className="compact-spaces-title">My Spaces</h3>
-        <div className="header-actions compact-header-actions">
+    <div className="spaces-container ultra-compact-spaces-container">
+      <div className="spaces-header ultra-compact-spaces-header">
+        <h3 className="ultra-compact-spaces-title"><Book size={16} style={{ marginRight: 4, verticalAlign: 'middle' }} />My Spaces</h3>
+        <div className="header-actions ultra-compact-header-actions">
           <button
             onClick={async () => await loadSpaces(authToken)}
-            className="button button-neutral compact-refresh-spaces-btn"
+            className="button button-neutral ultra-compact-refresh-btn"
             disabled={loading}
             title="Refresh spaces"
           >
-            {loading ? '🔄' : '↻'}
+            {loading ? <Loader size={16} className="spin" /> : <RefreshCw size={16} />}
           </button>
         </div>
       </div>
 
+      {/* Search bar */}
+      {!loading && !error && spaces.length > 0 && (
+        <div className="ultra-compact-search-container">
+          <div className="ultra-compact-search-wrapper">
+            <span className="ultra-compact-search-icon"><Search size={14} /></span>
+            <input
+              type="text"
+              placeholder="Search spaces..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="ultra-compact-search-input"
+            />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="ultra-compact-search-clear"
+                title="Clear search"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="ultra-compact-search-results">
+              {filteredSpaces.length} of {spaces.length} spaces
+            </div>
+          )}
+        </div>
+      )}
+
       {loading && (
-        <div className="spaces-loading compact-spaces-loading">
-          <p>Loading your spaces...</p>
+        <div className="spaces-loading ultra-compact-loading">
+          <p>Loading spaces...</p>
         </div>
       )}
 
       {error && (
-        <div className="spaces-error compact-spaces-error">
+        <div className="spaces-error ultra-compact-error">
           <p>{error}</p>
-          <button onClick={loadSpaces} className="button button-danger compact-retry-btn">
+          <button onClick={loadSpaces} className="button button-danger ultra-compact-retry-btn">
             Try Again
           </button>
         </div>
@@ -241,50 +298,48 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
       {!loading && !error && (
         <>
           {spaces.length === 0 ? (
-            <div className="no-spaces compact-no-spaces">
+            <div className="no-spaces ultra-compact-no-spaces">
               <p>No spaces found.</p>
-              <p className="no-spaces-hint compact-no-spaces-hint">
-                Create your first space in the web app!
-              </p>
+              <p className="no-spaces-hint">Create your first space in the web app!</p>
+            </div>
+          ) : filteredSpaces.length === 0 ? (
+            <div className="no-spaces ultra-compact-no-spaces">
+              <p>No spaces match your search.</p>
+              <p className="no-spaces-hint">Try a different search term or clear the search.</p>
             </div>
           ) : (
-            <div className="spaces-list compact-spaces-list">
-              {spaces.map((space) => (
-                <div key={space.id} className="space-item compact-space-item">
-                  <div className="space-info compact-space-info">
-                    <h4 className="space-name compact-space-name">{space.name}</h4>
-                    {space.description && (
-                      <p className="space-description compact-space-description">{space.description}</p>
-                    )}
-                    <div className="space-meta compact-space-meta">
-                      <span className="space-visibility compact-space-visibility">
-                        {space.isPublic ? '🌐 Public' : '🔒 Private'}
+            <div className="spaces-list ultra-compact-spaces-list">
+              {filteredSpaces.map((space) => (
+                <div key={space.id} className="space-item ultra-compact-space-item">
+                  <div className="ultra-compact-space-left">
+                    <div className="ultra-compact-space-name" title={space.name}>
+                      {space.name}
+                    </div>
+                    <div className="ultra-compact-space-meta">
+                      <span className="ultra-compact-visibility">
+                        {space.isPublic ? <Globe size={12} /> : <Lock size={12} />}
                       </span>
-                      <span className="space-materials compact-space-materials">
-                        📚 {space._count?.studyMaterials || 0} materials
+                      <span className="ultra-compact-materials">
+                        <Book size={12} /> {space._count?.studyMaterials || 0}
                       </span>
                     </div>
                   </div>
 
-                  <div className="space-actions compact-space-actions">
-                    <button
-                      onClick={() => saveToSpace(space)}
-                      className={`button button-white compact-save-to-space-btn ${!currentContent || savingToSpace === space.id
-                        ? 'disabled'
-                        : 'enabled'
-                        }`}
-                      disabled={!currentContent || savingToSpace === space.id}
-                      title={
-                        !currentContent
-                          ? 'Extract content first'
-                          : 'Save content as study material'
-                      }
-                    >
-                      {savingToSpace === space.id
-                        ? '💾 Saving...'
-                        : '💾 Save Here'}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => saveToSpace(space)}
+                    className={`ultra-compact-save-btn ${!currentContent || savingToSpace === space.id
+                      ? 'disabled'
+                      : 'enabled'
+                      }`}
+                    disabled={!currentContent || savingToSpace === space.id}
+                    title={
+                      !currentContent
+                        ? 'Extract content first'
+                        : 'Save content as study material'
+                    }
+                  >
+                    {savingToSpace === space.id ? <Loader size={16} className="spin" /> : <Save size={16} />}
+                  </button>
                 </div>
               ))}
             </div>
@@ -294,36 +349,35 @@ const Spaces = ({ onSpaceSelect, currentContent, onContentSaved }) => {
 
       {/* Enhanced status indicator */}
       {currentContent && (
-        <div className="content-status compact-content-status">
-          <div className="content-preview compact-content-preview">
-            <h5 className="compact-content-preview-title">📄 Ready to Save:</h5>
-            <p className="content-title compact-content-title">
+        <div className="content-status ultra-compact-content-status">
+          <div className="ultra-compact-content-preview">
+            <span className="ultra-compact-content-indicator"><FileText size={12} style={{ marginRight: 2, verticalAlign: 'middle' }} />Ready:</span>
+            <span className="ultra-compact-content-title" title={currentContent.title || 'Untitled Content'}>
               {currentContent.title || 'Untitled Content'}
-            </p>
-            <p className="content-meta compact-content-meta">
-              {currentContent.type} •{' '}
-              {(currentContent.content?.length || 0).toLocaleString()}{' '}
-              characters
-            </p>
+            </span>
+            <span className="ultra-compact-content-size">
+              ({(currentContent.content?.length || 0).toLocaleString()} chars)
+            </span>
           </div>
         </div>
       )}
 
       {/* Toast notification */}
       {toast && (
-        <div className={`toast compact-toast ${toast.type}`}>
-          <div className="toast-content compact-toast-content">
-            <span className="toast-icon compact-toast-icon">
-              {toast.type === 'success' ? '✅' : '❌'}
+        <div className={`toast ultra-compact-toast ${toast.type}`}>
+          <div className="toast-content">
+            <span className="toast-icon">
+              {toast.type === 'success' ? <CheckCircle size={14} color="#10b981" /> : <XCircle size={14} color="#ef4444" />}
             </span>
-            <span className="toast-message compact-toast-message">{toast.message}</span>
+            <span className="toast-message">{toast.message}</span>
           </div>
         </div>
       )}
+
       {/* Shadcn-like toast */}
       {shadToast && (
         <div className="shadcn-toast">
-          <span className="shadcn-toast-icon">✅</span>
+          <span className="shadcn-toast-icon"><CheckCircle size={14} color="#10b981" /></span>
           <span className="shadcn-toast-message">{shadToast}</span>
         </div>
       )}
