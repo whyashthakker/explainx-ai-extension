@@ -97,43 +97,50 @@ function createFloatingButton() {
 
   // Drag functionality variables
   let isDragging = false;
+  let hasDragged = false;
   let dragOffset = { x: 0, y: 0 };
-  let clickTimeout = null;
+  let startPos = { x: 0, y: 0 };
 
   // Mouse down handler
   button.addEventListener('mousedown', (e) => {
     e.preventDefault();
     isDragging = true;
+    hasDragged = false;
     dragOffset.x = e.clientX - button.getBoundingClientRect().left;
     dragOffset.y = e.clientY - button.getBoundingClientRect().top;
+    startPos.x = e.clientX;
+    startPos.y = e.clientY;
     button.style.cursor = 'grabbing';
-    
-    // Clear any existing timeout
-    if (clickTimeout) {
-      clearTimeout(clickTimeout);
-      clickTimeout = null;
-    }
   });
 
   // Mouse move handler
   document.addEventListener('mousemove', (e) => {
     if (isDragging) {
-      const newX = e.clientX - dragOffset.x;
-      const newY = e.clientY - dragOffset.y;
-      
-      // Constrain to right side of screen (right 50% of viewport)
-      const minX = window.innerWidth / 2;
-      const maxX = window.innerWidth - button.offsetWidth;
-      const minY = 0;
-      const maxY = window.innerHeight - button.offsetHeight;
-      
-      const constrainedX = Math.max(minX, Math.min(maxX, newX));
-      const constrainedY = Math.max(minY, Math.min(maxY, newY));
-      
-      button.style.left = `${constrainedX}px`;
-      button.style.top = `${constrainedY}px`;
-      button.style.right = 'auto';
-      button.style.bottom = 'auto';
+      const moveDistance = Math.sqrt(
+        Math.pow(e.clientX - startPos.x, 2) +
+        Math.pow(e.clientY - startPos.y, 2)
+      );
+
+      // Only start dragging if moved more than 5px
+      if (moveDistance > 5) {
+        hasDragged = true;
+        const newX = e.clientX - dragOffset.x;
+        const newY = e.clientY - dragOffset.y;
+
+        // Constrain to right side of screen (right 50% of viewport)
+        const minX = window.innerWidth / 2;
+        const maxX = window.innerWidth - button.offsetWidth;
+        const minY = 0;
+        const maxY = window.innerHeight - button.offsetHeight;
+
+        const constrainedX = Math.max(minX, Math.min(maxX, newX));
+        const constrainedY = Math.max(minY, Math.min(maxY, newY));
+
+        button.style.left = `${constrainedX}px`;
+        button.style.top = `${constrainedY}px`;
+        button.style.right = 'auto';
+        button.style.bottom = 'auto';
+      }
     }
   });
 
@@ -142,17 +149,12 @@ function createFloatingButton() {
     if (isDragging) {
       isDragging = false;
       button.style.cursor = 'pointer';
-      
-      // Set a timeout to allow click after drag ends
-      clickTimeout = setTimeout(() => {
-        clickTimeout = null;
-      }, 100);
     }
   });
 
-  // Click handler (only if not dragging)
-  button.addEventListener('click', (e) => {
-    if (!clickTimeout) {
+  // Click handler
+  button.addEventListener('click', () => {
+    if (!hasDragged) {
       handleExtractContent();
     }
   });
@@ -192,11 +194,34 @@ function showLoadingState() {
     btnText.style.alignItems = 'center';
     btnText.style.justifyContent = 'center';
     btnText.style.height = '100%';
-    btnText.style.opacity = '1';
+    btnText.style.opacity = '0';
     btnText.style.transition = 'opacity 0.18s, width 0.18s';
     btnText.style.whiteSpace = 'nowrap';
     btnText.style.overflow = 'hidden';
-    btnText.style.width = 'auto';
+    btnText.style.width = '0';
+
+    // Add hover effects for loading state
+    button.addEventListener('mouseenter', () => {
+      button.style.transform = 'scale(1.08)';
+      button.style.boxShadow = '0 4px 18px rgba(124, 58, 237, 0.22)';
+      btnText.style.width = 'auto';
+      btnText.style.opacity = '1';
+      btnContent.style.justifyContent = 'center';
+      btnContent.style.alignItems = 'center';
+      button.style.width = '120px';
+      btnContent.style.gap = '10px';
+    });
+
+    button.addEventListener('mouseleave', () => {
+      button.style.transform = 'scale(1)';
+      button.style.boxShadow = '0 2px 12px rgba(124, 58, 237, 0.18)';
+      btnText.style.width = '0';
+      btnText.style.opacity = '0';
+      button.style.width = '56px';
+      btnContent.style.justifyContent = 'center';
+      btnContent.style.alignItems = 'center';
+      btnContent.style.gap = '8px';
+    });
   }
 }
 
@@ -211,6 +236,54 @@ function showSuccessState() {
         <span class="explainx-btn-text">Extracted</span>
       </div>
     `;
+    const btnContent = button.querySelector('.explainx-btn-content');
+    btnContent.style.display = 'flex';
+    btnContent.style.flexDirection = 'row';
+    btnContent.style.alignItems = 'center';
+    btnContent.style.justifyContent = 'center';
+    btnContent.style.textAlign = 'center';
+    btnContent.style.gap = '8px';
+    btnContent.style.width = '100%';
+    btnContent.style.height = '100%';
+    const btnText = button.querySelector('.explainx-btn-text');
+    btnText.style.fontSize = '13px';
+    btnText.style.fontWeight = '700';
+    btnText.style.margin = '0';
+    btnText.style.lineHeight = '1';
+    btnText.style.letterSpacing = '0.01em';
+    btnText.style.color = '#7c3aed';
+    btnText.style.display = 'flex';
+    btnText.style.alignItems = 'center';
+    btnText.style.justifyContent = 'center';
+    btnText.style.height = '100%';
+    btnText.style.opacity = '0';
+    btnText.style.transition = 'opacity 0.18s, width 0.18s';
+    btnText.style.whiteSpace = 'nowrap';
+    btnText.style.overflow = 'hidden';
+    btnText.style.width = '0';
+
+    // Add hover effects for success state
+    button.addEventListener('mouseenter', () => {
+      button.style.transform = 'scale(1.08)';
+      button.style.boxShadow = '0 4px 18px rgba(124, 58, 237, 0.22)';
+      btnText.style.width = 'auto';
+      btnText.style.opacity = '1';
+      btnContent.style.justifyContent = 'center';
+      btnContent.style.alignItems = 'center';
+      button.style.width = '120px';
+      btnContent.style.gap = '10px';
+    });
+
+    button.addEventListener('mouseleave', () => {
+      button.style.transform = 'scale(1)';
+      button.style.boxShadow = '0 2px 12px rgba(124, 58, 237, 0.18)';
+      btnText.style.width = '0';
+      btnText.style.opacity = '0';
+      button.style.width = '56px';
+      btnContent.style.justifyContent = 'center';
+      btnContent.style.alignItems = 'center';
+      btnContent.style.gap = '8px';
+    });
 
     // Reset after 2 seconds
     setTimeout(() => {
@@ -511,7 +584,7 @@ function getPageText() {
 }
 
 // Message listener for popup requests
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   console.log('Content script received message:', request);
 
   if (request.action === 'getStoredContent') {
