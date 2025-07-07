@@ -95,8 +95,67 @@ function createFloatingButton() {
     btnContent.style.gap = '8px';
   });
 
-  // Click handler
-  button.addEventListener('click', handleExtractContent);
+  // Drag functionality variables
+  let isDragging = false;
+  let dragOffset = { x: 0, y: 0 };
+  let clickTimeout = null;
+
+  // Mouse down handler
+  button.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isDragging = true;
+    dragOffset.x = e.clientX - button.getBoundingClientRect().left;
+    dragOffset.y = e.clientY - button.getBoundingClientRect().top;
+    button.style.cursor = 'grabbing';
+    
+    // Clear any existing timeout
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      clickTimeout = null;
+    }
+  });
+
+  // Mouse move handler
+  document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+      const newX = e.clientX - dragOffset.x;
+      const newY = e.clientY - dragOffset.y;
+      
+      // Constrain to right side of screen (right 50% of viewport)
+      const minX = window.innerWidth / 2;
+      const maxX = window.innerWidth - button.offsetWidth;
+      const minY = 0;
+      const maxY = window.innerHeight - button.offsetHeight;
+      
+      const constrainedX = Math.max(minX, Math.min(maxX, newX));
+      const constrainedY = Math.max(minY, Math.min(maxY, newY));
+      
+      button.style.left = `${constrainedX}px`;
+      button.style.top = `${constrainedY}px`;
+      button.style.right = 'auto';
+      button.style.bottom = 'auto';
+    }
+  });
+
+  // Mouse up handler
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      button.style.cursor = 'pointer';
+      
+      // Set a timeout to allow click after drag ends
+      clickTimeout = setTimeout(() => {
+        clickTimeout = null;
+      }, 100);
+    }
+  });
+
+  // Click handler (only if not dragging)
+  button.addEventListener('click', (e) => {
+    if (!clickTimeout) {
+      handleExtractContent();
+    }
+  });
 
   document.body.appendChild(button);
   console.log('ExplainX floating button created');

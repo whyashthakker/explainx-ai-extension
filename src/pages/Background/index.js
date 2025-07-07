@@ -74,7 +74,7 @@ async function initiateAuth() {
             const returnedState = url.searchParams.get('state');
 
             // Close the auth tab
-            chrome.tabs.remove(authTab.id);
+            // chrome.tabs.remove(authTab.id);
 
             if (code && returnedState) {
               // Exchange code for token

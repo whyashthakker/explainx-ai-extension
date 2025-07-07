@@ -181,12 +181,19 @@ const Content = ({ onSaveToSpace }) => {
                 </span>
               )}
             </div>
-            {pageInfo.url && (
+            {/* {pageInfo.url && (
               <button onClick={openSourceUrl} className="button button-white compact-source-link-btn">
                 <ExternalLink size={16} />
                 Source
               </button>
-            )}
+            )} */}
+            <button
+              onClick={onSaveToSpace}
+              className="button button-white compact-action-btn"
+            >
+              <Box size={16} />
+              Add to Space
+            </button>
           </div>
 
           {content && !loading && (
@@ -220,13 +227,7 @@ const Content = ({ onSaveToSpace }) => {
 
 
 
-          <button
-            onClick={onSaveToSpace}
-            className="button button-white compact-action-btn"
-          >
-            <Box size={16} />
-            Add to Space
-          </button>
+
           {content && (
             <button
               onClick={handleShowTranscript}
